@@ -37,19 +37,33 @@ A vitória ocorre ao ficar com 60 ou mais na nota final; a derrota acontece quan
 O jogador deve atingir a pontuação mínima para vencer cada professor. Caso perca, deverá reiniciar desde a primeira fase, mesmo que já tenha avançado anteriormente.
 
 12. Estrutura do Projeto -
+
 • Organização dos arquivos do jogo:
+
 /assets → Sprites dos personagens, cenários e efeitos visuais
+
 /audio → Trilhas sonoras e efeitos sonoros
+
 /scripts → Lógica do jogo (ritmo, pontuação, mecânicas)
+
 /scenes → Telas (menu, fases, vitória/derrota)
+
 /ui → Interface do usuário
+
 • Separação por responsabilidades:
+
 Player (Aluno) → Entrada do jogador e execução das notas
+
 Professores (Inimigos) → Sequências rítmicas adversárias
+
 Sistema de Ritmo → Sincronização música + inputs
+
 Mapa/Cenário → Ambientação visual
+
 Sistema Geral (Game Manager) → Controle de fases, progresso e vitória
+
 Interface (UI) → Exibição de pontuação, combo e feedback
+
 Sistema de Áudio → Reprodução e sincronização sonora
 
 13. Funcionalidades Mínimas -
