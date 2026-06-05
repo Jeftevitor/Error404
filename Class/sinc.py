@@ -15,4 +15,4 @@ class Sinc:
             if receptor.verificar_input():
                 for seta in setas:
                     if receptor.verificar_colisao(seta):
-                        seta.acertada = True
+                        seta.hit = True

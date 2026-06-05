@@ -6,7 +6,7 @@ class Seta:
         self.y = y
         self.direcao = direcao
         self.velocidade = 5
-        self.acertada = False
+        self.hit = False
         
         if self.direcao == 'esquerda':
             self.imagem = pygame.image.load('Assets/Sprites/esquerda.png').convert_alpha()
@@ -23,11 +23,9 @@ class Seta:
         self.imagem = pygame.transform.scale(self.imagem,(210, 200))
         
     def acertou(self):
-        if self.acertada == True:
+        if self.hit:
             self.x = 1500
             self.y = 1500
-        else:
-            pass
         
     def mover(self):
         self.y += self.velocidade
