@@ -40,7 +40,7 @@ class Pontuacao:
         else:
             self.pontos += self.pontos_perdidos
             self.combo = 0
-            return 'miss'
+            return 'errou'
 
     def resetar_combo(self):
         self.pontos = 0

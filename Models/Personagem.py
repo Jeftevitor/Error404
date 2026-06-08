@@ -17,3 +17,23 @@ class Personagem:
 
         elif self.seta == 'cima':
             return 'cima'
+    
+    def desenhar(self, tela):
+        if self.seta == 'cima':
+            tela.blit(self.sprite, (self.x, self.y))
+
+        elif self.seta == 'baixo':
+            tela.blit(self.sprite, (self.x, self.y))
+
+        elif self.seta == 'esquerda':
+            tela.blit(self.sprite, (self.x, self.y))
+
+        elif self.seta == 'direita':
+            tela.blit(self.sprite, (self.x, self.y))
+            
+        elif self.estado == 'morrer':
+            tela.blit(self.sprite, (self.x, self.y))
+        
+        # IDLE 
+        else:
+            tela.blit(self.sprite, (self.x, self.y))

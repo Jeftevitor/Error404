@@ -31,24 +31,7 @@ class Principal(Personagem):
             self.estado = 'morrer'
             
     def desenhar(self, tela):
-        if self.seta == 'cima':
-            tela.blit(self.sprite, (self.x, self.y))
-
-        elif self.seta == 'baixo':
-            tela.blit(self.sprite, (self.x, self.y))
-
-        elif self.seta == 'esquerda':
-            tela.blit(self.sprite, (self.x, self.y))
-
-        elif self.seta == 'direita':
-            tela.blit(self.sprite, (self.x, self.y))
-            
-        elif self.estado == 'morrer':
-            tela.blit(self.sprite, (self.x, self.y))
-        
-        # IDLE 
-        else:
-            tela.blit(self.sprite, (self.x, self.y))
+        Personagem.desenhar()
 
         self.desenhar_julgamento(tela)
         self.desenhar_pontos(tela)
@@ -62,7 +45,7 @@ class Principal(Personagem):
             self.julgamento = julgamento
             self.tempo_reacao = pygame.time.get_ticks()
         else:
-            self.julgamento = 'miss'
+            self.julgamento = 'errou'
             self.tempo_reacao = pygame.time.get_ticks()
 
     def desenhar_julgamento(self, tela):
