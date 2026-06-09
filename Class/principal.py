@@ -51,17 +51,21 @@ class Principal(Personagem):
     def desenhar_julgamento(self, tela):
         tempo_atual = pygame.time.get_ticks()
         if tempo_atual - self.tempo_reacao < self.duracao_exibicao:
-            if self.julgamento == 'perfeito':
+            julgamento_exibir = self.julgamento
+            if isinstance(julgamento_exibir, str) and 'miss' in julgamento_exibir.lower():
+                julgamento_exibir = 'errou'
+
+            if julgamento_exibir == 'perfeito':
                 cor = (0, 255, 0)
-            elif self.julgamento == 'bom':
+            elif julgamento_exibir == 'bom':
                 cor = (0, 100, 255)
-            elif self.julgamento == 'ruim':
+            elif julgamento_exibir == 'ruim':
                 cor = (255, 255, 0)
             else:
                 cor = (255, 0, 0)
 
             fonte = pygame.font.Font(None, 36)
-            texto = fonte.render(self.julgamento.upper(), True, cor)
+            texto = fonte.render(julgamento_exibir.upper(), True, cor)
             tela.blit(texto, (self.x, self.y - 50))
 
     def desenhar_pontos(self, tela):
