@@ -1,11 +1,14 @@
 import pygame
 from Models.personagem import Personagem
-from Class.pontuacao import Pontuacao
+from Class.pontuacao import Pontuacao  
 
 class Principal(Personagem):
 
-    def __init__(self, x, y, nome, seta, sprite):
+    def __init__(self, x, y, nome, seta, sprite, setas, receptores):
         super().__init__(x, y, nome, seta)
+
+        self.setas = setas
+        self.receptores = receptores
 
         self.nota = 50
         self.estado = None
@@ -29,43 +32,21 @@ class Principal(Personagem):
     def morrer(self):
         if self.nota <= 0:
             self.estado = 'morrer'
-            
-    def desenhar(self, tela):
-        Personagem.desenhar()
-
-        self.desenhar_julgamento(tela)
-        self.desenhar_pontos(tela)
-    
-    def verificar_toque(self, tempo_reacao):
-        tempo_atual = pygame.time.get_ticks()
-        diferenca = tempo_atual - tempo_reacao
-
-        if abs(diferenca) <= self.pontuacao.janela_ruim:
-            julgamento = self.pontuacao.calcular_pontos(diferenca)
-            self.julgamento = julgamento
-            self.tempo_reacao = pygame.time.get_ticks()
-        else:
-            self.julgamento = 'errou'
-            self.tempo_reacao = pygame.time.get_ticks()
 
     def desenhar_julgamento(self, tela):
         tempo_atual = pygame.time.get_ticks()
         if tempo_atual - self.tempo_reacao < self.duracao_exibicao:
-            julgamento_exibir = self.julgamento
-            if isinstance(julgamento_exibir, str) and 'miss' in julgamento_exibir.lower():
-                julgamento_exibir = 'errou'
-
-            if julgamento_exibir == 'perfeito':
+            if self.julgamento == 'perfeito':
                 cor = (0, 255, 0)
-            elif julgamento_exibir == 'bom':
+            elif self.julgamento == 'bom':
                 cor = (0, 100, 255)
-            elif julgamento_exibir == 'ruim':
+            elif self.julgamento == 'ruim':
                 cor = (255, 255, 0)
             else:
                 cor = (255, 0, 0)
 
             fonte = pygame.font.Font(None, 36)
-            texto = fonte.render(julgamento_exibir.upper(), True, cor)
+            texto = fonte.render(self.julgamento.upper(), True, cor)
             tela.blit(texto, (self.x, self.y - 50))
 
     def desenhar_pontos(self, tela):
@@ -76,3 +57,9 @@ class Principal(Personagem):
         if self.pontuacao.combo > 0:
             texto_combo = fonte.render(f'Combo: {self.pontuacao.combo}', True, (255, 255, 255))
             tela.blit(texto_combo, (10, 50))
+    
+    def desenhar(self, tela):
+        super().desenhar(tela)
+
+        self.desenhar_julgamento(tela)
+        self.desenhar_pontos(tela)
