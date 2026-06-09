@@ -2,44 +2,46 @@ import pygame
 
 class TelaInicial:
     def __init__(self, largura, altura):
+
         self.largura = largura
         self.altura = altura
 
-        self.fonte_titulo = pygame.font.Font(None, 80)
-        self.fonte_botao = pygame.font.Font(None, 50)
+        self.botoes = ['comecar', 'score', 'creditos', 'sair']
 
-        self.botoes = {
-            "comecar": pygame.Rect(largura // 2 - 100, 180, 200, 50),
-            "score": pygame.Rect(largura // 2 - 100, 260, 200, 50),
-            "creditos": pygame.Rect(largura // 2 - 100, 340, 200, 50),
-            "sair": pygame.Rect(largura // 2 - 100, 420, 200, 50)
+        # Fundo
+        self.img_f = pygame.image.load('Assets/Telas/tela_inicial.png').convert_alpha()
+
+        # Logo
+        self.img_l = pygame.image.load('Assets/Telas/logo.png').convert_alpha()
+
+        self.img_b = {}
+
+        for b in self.botoes:
+            self.img_b[b] = pygame.image.load(f'Assets/Telas/b_{b}.png').convert_alpha()
+
+        self.rects = {
+            'comecar': pygame.Rect(820, 200, 200, 110),
+            'score': pygame.Rect(820, 270, 200, 110),
+            'creditos': pygame.Rect(820, 340, 200, 110),
+            'sair': pygame.Rect(820, 410, 200, 110)
         }
 
     def desenhar(self, tela):
         tela.fill((20, 20, 20))
 
-        titulo = self.fonte_titulo.render("ERROR404", True, (255, 255, 255))
-        tela.blit(
-            titulo,
-            (self.largura // 2 - titulo.get_width() // 2, 50)
-        )
+        fundo = pygame.transform.scale(self.img_f,(self.largura, self.altura))
 
-        for nome, rect in self.botoes.items():
-            pygame.draw.rect(tela, (80, 80, 80), rect)
-            pygame.draw.rect(tela, (255, 255, 255), rect, 2)
+        tela.blit(fundo, (0, 0))
 
-            texto = self.fonte_botao.render(nome.upper(), True, (255, 255, 255))
-            tela.blit(
-                texto,
-                (
-                    rect.centerx - texto.get_width() // 2,
-                    rect.centery - texto.get_height() // 2
-                )
-            )
+        for b in self.botoes:
+            botao = pygame.transform.scale(self.img_b[b],(200, 140))
+            tela.blit(botao,(self.rects[b].x,self.rects[b].y))
+
+        logo = pygame.transform.scale(self.img_l,(420, 270))
+        tela.blit(logo, (20, 10))
 
     def verificar_clique(self, pos):
-        for nome, rect in self.botoes.items():
+        for nome, rect in self.rects.items():
             if rect.collidepoint(pos):
                 return nome
-
         return None
