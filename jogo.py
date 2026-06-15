@@ -77,25 +77,37 @@ class Jogo:
                     return
                 
     def processa_eventos(self):
-        if self.estado == "menu":
-            if evento.type == pygame.MOUSEBUTTONDOWN:
+        eventos = pygame.event.get()
 
-                botao = self.tela_inicial.verificar_clique(evento.pos)
+        for evento in eventos:
 
-                if botao == "comecar":
-                    self.estado = "jogo"
-
-                elif botao == "score":
-                    print("Tela de score")
-
-                elif botao == "creditos":
-                    print("Tela de créditos")
-
-                elif botao == "sair":
-                    self.rodando = False
-        for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 self.rodando = False
+
+            if self.estado == "menu":
+
+                if evento.type == pygame.MOUSEBUTTONDOWN:
+
+                    botao = self.tela_inicial.verificar_clique(evento.pos)
+
+                    if botao == "comecar":
+                        self.estado = "jogo"
+
+                    elif botao == "score":
+                        print("Tela de score")
+
+                    elif botao == "creditos":
+                        print("Tela de créditos")
+
+                    elif botao == "sair":
+                        self.rodando = False
+
+            elif self.estado == "jogo":
+
+                if evento.type == pygame.KEYDOWN:
+
+                    if evento.key in teclas_setas:
+                        self.verificar_toque(teclas_setas[evento.key])
                 
     def atualizar(self):
         for seta in self.setas:
