@@ -1,11 +1,14 @@
 import pygame
 from Models.personagem import Personagem
-from Class.pontuacao import Pontuacao
+from Class.pontuacao import Pontuacao  
 
 class Principal(Personagem):
 
-    def __init__(self, x, y, nome, seta, sprite):
+    def __init__(self, x, y, nome, seta, sprite, setas, receptores):
         super().__init__(x, y, nome, seta)
+
+        self.setas = setas
+        self.receptores = receptores
 
         self.nota = 50
         self.estado = None
@@ -29,41 +32,6 @@ class Principal(Personagem):
     def morrer(self):
         if self.nota <= 0:
             self.estado = 'morrer'
-            
-    def desenhar(self, tela):
-        if self.seta == 'cima':
-            tela.blit(self.sprite, (self.x, self.y))
-
-        elif self.seta == 'baixo':
-            tela.blit(self.sprite, (self.x, self.y))
-
-        elif self.seta == 'esquerda':
-            tela.blit(self.sprite, (self.x, self.y))
-
-        elif self.seta == 'direita':
-            tela.blit(self.sprite, (self.x, self.y))
-            
-        elif self.estado == 'morrer':
-            tela.blit(self.sprite, (self.x, self.y))
-        
-        # IDLE 
-        else:
-            tela.blit(self.sprite, (self.x, self.y))
-
-        self.desenhar_julgamento(tela)
-        self.desenhar_pontos(tela)
-    
-    def verificar_toque(self, tempo_reacao):
-        tempo_atual = pygame.time.get_ticks()
-        diferenca = tempo_atual - tempo_reacao
-
-        if abs(diferenca) <= self.pontuacao.janela_ruim:
-            julgamento = self.pontuacao.calcular_pontos(diferenca)
-            self.julgamento = julgamento
-            self.tempo_reacao = pygame.time.get_ticks()
-        else:
-            self.julgamento = 'miss'
-            self.tempo_reacao = pygame.time.get_ticks()
 
     def desenhar_julgamento(self, tela):
         tempo_atual = pygame.time.get_ticks()
@@ -89,3 +57,9 @@ class Principal(Personagem):
         if self.pontuacao.combo > 0:
             texto_combo = fonte.render(f'Combo: {self.pontuacao.combo}', True, (255, 255, 255))
             tela.blit(texto_combo, (10, 50))
+    
+    def desenhar(self, tela):
+        super().desenhar(tela)
+
+        self.desenhar_julgamento(tela)
+        self.desenhar_pontos(tela)

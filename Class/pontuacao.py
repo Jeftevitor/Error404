@@ -21,28 +21,34 @@ class Pontuacao:
         if tempo_reacao <= self.janela_perfeita:
             self.pontos += self.pontos_perfeitos
             self.combo += 1
+
             if self.combo > self.max_combo:
                 self.max_combo = self.combo
-            return 'perfeito'
+
+            return "perfeito"
 
         elif tempo_reacao <= self.janela_boa:
             self.pontos += self.pontos_bons
             self.combo += 1
+
             if self.combo > self.max_combo:
                 self.max_combo = self.combo
-            return 'bom'
+
+            return "bom"
 
         elif tempo_reacao <= self.janela_ruim:
             self.pontos += self.pontos_ruins
             self.combo = 0
-            return 'ruim'
+
+            return "ruim"
 
         else:
             self.pontos += self.pontos_perdidos
             self.combo = 0
-            return 'miss'
 
-    def resetar_combo(self):
+            return "errou"
+
+    def resetar(self):
         self.pontos = 0
         self.combo = 0
         self.max_combo = 0
