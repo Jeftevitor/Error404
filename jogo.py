@@ -3,6 +3,7 @@ from Class.seta import Seta
 from Class.sinc import Sinc
 from Class.pontuacao import Pontuacao
 from Class.tela_inicial import TelaInicial
+from Class.intro import Intro
 
 teclas_setas = {
     pygame.K_LEFT: 'esquerda',
@@ -15,6 +16,14 @@ class Jogo:
     def __init__(self):
         pygame.init()
 
+        pygame.mixer.init()
+
+        pygame.mixer.music.load(
+            'Assets/Music/Menu.ogg'
+            )
+
+        pygame.mixer.music.play(-1)
+
         self.largura = 1200
         self.altura = 720
         
@@ -25,6 +34,7 @@ class Jogo:
         pygame.display.set_caption("Error404")
 
         self.tela_inicial = TelaInicial(self.largura,self.altura)
+        self.intro = Intro(self.largura,self.altura)
         
         pygame.display.set_caption("Error404")
         self.clock = pygame.time.Clock()
@@ -83,23 +93,29 @@ class Jogo:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
                 self.rodando = False
-            if self.estado == "menu":
+            if self.estado == "intro":
+                if evento.type == pygame.KEYDOWN:
+                    self.estado = "menu"
+            elif self.estado == "menu":
+
                 if evento.type == pygame.MOUSEBUTTONDOWN:
                     botao = self.tela_inicial.verificar_clique(
                         evento.pos
                     )
                     if botao == "comecar":
                         self.estado = "jogo"
+                        pygame.mixer.music.stop()
 
+                        pygame.mixer.music.load(
+                            'Assets/Music/Joaildo.ogg'
+                        )
+                        pygame.mixer.music.play()
                     elif botao == "score":
                         pass
-
                     elif botao == "creditos":
                         pass
-
                     elif botao == "sair":
                         self.rodando = False
-
     def atualizar(self):
         if self.estado != "jogo":
             return

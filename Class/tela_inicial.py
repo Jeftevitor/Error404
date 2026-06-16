@@ -28,7 +28,7 @@ class TelaInicial:
 
     def desenhar(self, tela):
         tela.fill((20, 20, 20))
-
+    
         fundo = pygame.transform.scale(self.img_f,(self.largura, self.altura))
 
         tela.blit(fundo, (0, 0))
