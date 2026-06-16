@@ -31,7 +31,5 @@ class Seta:
         self.y += self.velocidade
 
     def desenhar(self, tela):
+
         tela.blit(self.imagem, (self.x, self.y))
-
-    
-
