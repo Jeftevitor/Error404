@@ -27,7 +27,7 @@ class Jogo:
         self.largura = 1200
         self.altura = 720
         
-        self.estado = "menu"
+        self.estado = "intro"
 
         self.tela = pygame.display.set_mode((self.largura, self.altura))
 
@@ -95,7 +95,8 @@ class Jogo:
                 self.rodando = False
             if self.estado == "intro":
                 if evento.type == pygame.KEYDOWN:
-                    self.estado = "menu"
+                    if evento.key == pygame.K_RETURN:
+                        self.estado = "menu"
             elif self.estado == "menu":
 
                 if evento.type == pygame.MOUSEBUTTONDOWN:
@@ -126,12 +127,15 @@ class Jogo:
         self.verificar_toque()
         
     def desenhar(self):
+        if self.estado == "intro":
+            self.intro.desenhar(self.tela)
+            pygame.display.update()
+            return
         if self.estado == "menu":
-
             self.tela_inicial.desenhar(self.tela)
             pygame.display.update()
             return
-
+        
         self.tela.fill((0, 0, 0))
 
         self.seta_esquerda.desenhar(self.tela)
