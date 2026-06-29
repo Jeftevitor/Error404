@@ -24,6 +24,8 @@ class Jogo:
 
         pygame.mixer.music.play(-1)
 
+        self.tempo_inicio = pygame.time.get_ticks()
+
         self.largura = 1200
         self.altura = 720
         
@@ -54,15 +56,17 @@ class Jogo:
 
         self.setas = []
 
-        self.setas.append(Seta(self.seta_esquerda.x, -100, 'esquerda'))
-        self.setas.append(Seta(self.seta_baixo.x, -300, 'baixo'))
-        self.setas.append(Seta(self.seta_cima.x, -500, 'cima'))
-        self.setas.append(Seta(self.seta_cima.x, -500, 'cima'))
-        self.setas.append(Seta(self.seta_direita.x, -700, 'direita'))
-        self.setas.append(Seta(self.seta_direita.x, -800, 'direita'))
-        self.setas.append(Seta(self.seta_cima.x, -900, 'cima'))
+        self.notas = []
 
-        self.sinc = Sinc(self)
+        with open("Assets/Arquivos_txt/fase1.txt", "r", encoding="utf-8") as arquivo:
+            for linha in arquivo:
+                tempo, direcao = linha.strip().split()
+                self.notas.append((int(tempo), direcao))
+            
+        self.indice_nota = 0
+        self.tempo_inicio = 0
+
+
 
         self.pontuacao = Pontuacao()
 
@@ -120,6 +124,22 @@ class Jogo:
     def atualizar(self):
         if self.estado != "jogo":
             return
+        
+        tempo = pygame.time.get_ticks() - self.tempo_inicio
+
+        while (
+        self.indice_nota < len(self.notas)
+        and tempo >= self.notas[self.indice_nota][0]
+    ):
+            _, direcao = self.notas[self.indice_nota]
+
+        receptor = self.receptores[direcao]
+
+        self.setas.append(
+            Seta(receptor.x, -100, direcao)
+        )
+
+        self.indice_nota += 1
 
         for seta in self.setas:
             seta.mover()

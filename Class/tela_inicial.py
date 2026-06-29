@@ -9,7 +9,7 @@ class TelaInicial:
         self.botoes = ['comecar', 'score', 'creditos', 'sair']
 
         # Fundo
-        self.img_f = pygame.image.load('Assets/Telas/tela_inicial.png').convert_alpha()
+        self.img_f = pygame.image.load('Assets/Telas/fundo.jpg').convert_alpha()
 
         # Logo
         self.img_l = pygame.image.load('Assets/Telas/logo.png').convert_alpha()

@@ -5,7 +5,7 @@ class Intro:
         self.largura = largura
         self.altura = altura
 
-        self.img_f = pygame.image.load('Assets/Telas/tela_inicial.png').convert_alpha()
+        self.img_f = pygame.image.load('Assets/Telas/fundo.jpg').convert_alpha()
 
         self.img_l = pygame.image.load('Assets/Telas/logo.png').convert_alpha()
 
