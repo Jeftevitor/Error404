@@ -45,3 +45,21 @@ class TelaInicial:
             if rect.collidepoint(pos):
                 return nome
         return None
+    
+    def desenhar_creditos(self, tela):
+        tela.fill((20, 20, 20))
+        fonte = pygame.font.SysFont(None, 36)
+        linhas = [
+            "Créditos",
+            "Desenvolvedores: Jefte Vitor e Isabela Nóbrega",
+            "Design: Jefte Vitor e Isabela Nóbrega",
+            "Música: Jefte Vitor",
+            "O Error404 é um jogo rítmico inspirado em Friday Night Funkin, ambientado no IFRN Campus Caicó, especialmente nos laboratórios de informática. A proposta é que o jogador enfrente professores em batalhas musicais para conseguir se formar no curso."
+            "",
+            "Pressione qualquer tecla ou clique para voltar"
+        ]
+        y = 60
+        for linha in linhas:
+            texto = fonte.render(linha, True, (255, 255, 255))
+            tela.blit(texto, (60, y))
+            y += 42

@@ -109,6 +109,9 @@ class Jogo:
                     )
                     if botao == "comecar":
                         self.estado = "jogo"
+                        self.tempo_inicio = pygame.time.get_ticks()
+                        self.indice_nota = 0
+                        self.setas = []
                         pygame.mixer.music.stop()
 
                         pygame.mixer.music.load(
@@ -118,34 +121,40 @@ class Jogo:
                     elif botao == "score":
                         pass
                     elif botao == "creditos":
-                        pass
+                        self.estado = "creditos"
                     elif botao == "sair":
                         self.rodando = False
+
+                elif self.estado == "creditos":
+                    if evento.type == pygame.KEYDOWN or evento.type == pygame.MOUSEBUTTONDOWN:
+                        if evento.key == pygame.K_ESCAPE:
+                            self.estado = "menu"
+
     def atualizar(self):
         if self.estado != "jogo":
             return
-        
+
         tempo = pygame.time.get_ticks() - self.tempo_inicio
 
         while (
-        self.indice_nota < len(self.notas)
-        and tempo >= self.notas[self.indice_nota][0]
-    ):
+            self.indice_nota < len(self.notas)
+            and tempo >= self.notas[self.indice_nota][0]
+        ):
             _, direcao = self.notas[self.indice_nota]
+            receptor = self.receptores[direcao]
 
-        receptor = self.receptores[direcao]
+            self.setas.append(
+                Seta(receptor.x, -100, direcao)
+            )
 
-        self.setas.append(
-            Seta(receptor.x, -100, direcao)
-        )
-
-        self.indice_nota += 1
+            self.indice_nota += 1
 
         for seta in self.setas:
             seta.mover()
             seta.acertou()
+
         self.verificar_toque()
-        
+
     def desenhar(self):
         if self.estado == "intro":
             self.intro.desenhar(self.tela)
@@ -153,6 +162,10 @@ class Jogo:
             return
         if self.estado == "menu":
             self.tela_inicial.desenhar(self.tela)
+            pygame.display.update()
+            return
+        if self.estado == "creditos":
+            self.tela_inicial.desenhar_creditos(self.tela)
             pygame.display.update()
             return
         
