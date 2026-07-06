@@ -1,4 +1,4 @@
-from Models.personagem import Personagem
+from Models.Personagem import Personagem
 
 class Professores(Personagem):
     def __init__(self, x, y, nome, seta, sprite):

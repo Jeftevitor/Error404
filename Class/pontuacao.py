@@ -15,6 +15,8 @@ class Pontuacao:
         self.janela_boa = 100
         self.janela_ruim = 150
 
+        self.fonte = pygame.font.Font(None, 60)
+
     def calcular_pontos(self, tempo_reacao):
         tempo_reacao = abs(tempo_reacao)
 
@@ -52,3 +54,18 @@ class Pontuacao:
         self.pontos = 0
         self.combo = 0
         self.max_combo = 0
+    
+    def desenhar(self, tela, estado):
+        if estado == "perfeito":
+            texto = self.fonte.render("Perfeito!", True, (255, 255, 255))
+        elif estado == "bom":
+            texto = self.fonte.render("Bom!", True, (255, 255, 255))
+        elif estado == "ruim":
+            texto = self.fonte.render("É...", True, (255, 255, 255))
+        elif estado == "errou":
+            texto = self.fonte.render("Errou!", True, (255, 255, 255))
+        else:
+            return
+
+        texto_rect = texto.get_rect(center=(600, 100))
+        tela.blit(texto, texto_rect)

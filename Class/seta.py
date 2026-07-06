@@ -30,5 +30,8 @@ class Seta:
     def mover(self):
         self.y += self.velocidade
 
+    def perdeu(self, receptor_y):
+        return self.y > receptor_y + 150
+    
     def desenhar(self, tela):
         tela.blit(self.imagem, (self.x, self.y))

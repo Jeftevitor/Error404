@@ -1,5 +1,5 @@
 import pygame
-from Models.personagem import Personagem
+from Models.Personagem import Personagem
 from Class.pontuacao import Pontuacao  
 
 class Principal(Personagem):
