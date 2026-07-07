@@ -1,6 +1,5 @@
 import pygame
 from Models.Personagem import Personagem
-from Class.pontuacao import Pontuacao  
 
 class Principal(Personagem):
 
@@ -13,10 +12,6 @@ class Principal(Personagem):
         self.nota = 50
         self.estado = None
         self.sprite = sprite
-        self.pontuacao = Pontuacao()
-        self.julgamento = ""
-        self.tempo_reacao = 0
-        self.duracao_exibicao = 0
 
     def perder_nota(self, seta_apertada):
         if seta_apertada != self.seta:
@@ -32,34 +27,6 @@ class Principal(Personagem):
     def morrer(self):
         if self.nota <= 0:
             self.estado = 'morrer'
-
-    def desenhar_julgamento(self, tela):
-        tempo_atual = pygame.time.get_ticks()
-        if tempo_atual - self.tempo_reacao < self.duracao_exibicao:
-            if self.julgamento == 'perfeito':
-                cor = (0, 255, 0)
-            elif self.julgamento == 'bom':
-                cor = (0, 100, 255)
-            elif self.julgamento == 'ruim':
-                cor = (255, 255, 0)
-            else:
-                cor = (255, 0, 0)
-
-            fonte = pygame.font.Font(None, 36)
-            texto = fonte.render(self.julgamento.upper(), True, cor)
-            tela.blit(texto, (self.x, self.y - 50))
-
-    def desenhar_pontos(self, tela):
-        fonte = pygame.font.Font(None, 36)
-        texto_pontos = fonte.render(f'Pontos: {self.pontuacao.pontos}', True, (255, 255, 255))
-        tela.blit(texto_pontos, (10, 10))
-
-        if self.pontuacao.combo > 0:
-            texto_combo = fonte.render(f'Combo: {self.pontuacao.combo}', True, (255, 255, 255))
-            tela.blit(texto_combo, (10, 50))
     
     def desenhar(self, tela):
         super().desenhar(tela)
-
-        self.desenhar_julgamento(tela)
-        self.desenhar_pontos(tela)
