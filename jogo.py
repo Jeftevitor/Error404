@@ -1,6 +1,5 @@
 import pygame
 from Class.seta import Seta
-from Class.sinc import Sinc
 from Class.pontuacao import Pontuacao
 from Class.tela_inicial import TelaInicial
 from Class.intro import Intro
