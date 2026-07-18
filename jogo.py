@@ -23,6 +23,29 @@ class Jogo:
 
         self.estado = "intro"
 
+        self.fase_selecionada = 0
+
+        self.fases = [
+            {
+                "nome": "Joaildo",
+                "arquivo": "Assets/Arquivos_txt/fase1.txt",
+                "musica": "Assets/Music/Joaildo.ogg",
+                "desbloqueada": True
+            },
+            {
+                "nome": "Max e Hugo",
+                "arquivo": "Assets/Arquivos_txt/fase2.txt",
+                "musica": "Assets/Music/Max_e_Hugo.ogg",
+                "desbloqueada": False
+            },
+            {
+                "nome": "Romerito",
+                "arquivo": "Assets/Arquivos_txt/fase3.txt",
+                "musica": "Assets/Music/Romerito.ogg",
+                "desbloqueada": False
+            }
+        ]
+
         self.tela = pygame.display.set_mode(
             (self.largura, self.altura)
         )
@@ -51,13 +74,6 @@ class Jogo:
         self.setas = []
 
         self.notas = []
-
-        with open("Assets/Arquivos_txt/fase1.txt","r",encoding="utf-8") as arquivo:
-            for linha in arquivo:
-                tempo, direcao = linha.strip().split()
-                self.notas.append(
-                    (int(tempo), direcao)
-                )
 
         self.indice_nota = 0
         self.tempo_inicio = 0
@@ -100,15 +116,7 @@ class Jogo:
                     botao = (self.tela_inicial.verificar_clique(evento.pos))
 
                     if botao == "comecar":
-                        self.estado = "jogo"
-                        self.tempo_inicio = (pygame.time.get_ticks())
-
-                        self.indice_nota = 0
-                        self.setas = []
-
-                        pygame.mixer.music.stop()
-                        pygame.mixer.music.load("Assets/Music/Joaildo.ogg")
-                        pygame.mixer.music.play()
+                        self.estado = "selecao"
 
                     elif botao == "score":
                         pass
@@ -119,11 +127,53 @@ class Jogo:
                     elif botao == "sair":
                         self.rodando = False
 
+            elif self.estado == "selecao":
+
+                if evento.type == pygame.KEYDOWN:
+
+                    if evento.key == pygame.K_UP:
+                        if self.fase_selecionada > 0:
+                            self.fase_selecionada -= 1
+
+                    elif evento.key == pygame.K_DOWN:
+                        if self.fase_selecionada < 2:
+                            self.fase_selecionada += 1
+
+                    elif evento.key == pygame.K_RETURN:
+
+                        fase = self.fases[self.fase_selecionada]
+
+                        if fase["desbloqueada"]:
+
+                            self.carregar_fase(fase["arquivo"])
+
+                            pygame.mixer.music.stop()
+                            pygame.mixer.music.load(fase["musica"])
+                            pygame.mixer.music.play()
+
+                            self.tempo_inicio = pygame.time.get_ticks()
+
+                            self.estado = "jogo"
+
+                    elif evento.key == pygame.K_ESCAPE:
+                        self.estado = "menu"
+
             elif self.estado == "creditos":
                 if (evento.type== pygame.KEYDOWN):
                     if evento.key == pygame.K_ESCAPE:
                         self.estado = "menu"
 
+    def carregar_fase(self, arquivo_txt):
+
+        self.notas = []
+
+        with open(arquivo_txt, "r", encoding="utf-8") as arquivo:
+            for linha in arquivo:
+                tempo, direcao = linha.strip().split()
+                self.notas.append((int(tempo), direcao))
+
+        self.indice_nota = 0
+        self.setas = []
     def atualizar(self):
         if self.estado != "jogo":
             return
@@ -157,6 +207,27 @@ class Jogo:
 
         self.verificar_toque()
 
+        if self.indice_nota >= len(self.notas):
+
+            if self.fase_selecionada < len(self.fases)-1:
+                self.fases[self.fase_selecionada+1]["desbloqueada"] = True
+
+        if len(self.notas) > 0:
+
+            if self.indice_nota >= len(self.notas):
+
+                todas = True
+
+                for seta in self.setas:
+                    if not seta.hit:
+                        todas = False
+
+                if todas:
+                    self.estado = "selecao"
+
+                    pygame.mixer.music.stop()
+                    pygame.mixer.music.load("Assets/Music/Menu.ogg")
+                    pygame.mixer.music.play(-1)
     def desenhar(self):
         if self.estado == "intro":
             self.intro.desenhar(self.tela)
@@ -168,6 +239,39 @@ class Jogo:
             self.tela_inicial.desenhar(    self.tela)
             pygame.display.update()
 
+            return
+        
+        if self.estado == "selecao":
+
+            self.tela.fill((25,25,25))
+
+            fonte = pygame.font.SysFont(None,60)
+
+            titulo = fonte.render("ESCOLHA A FASE",True,(255,255,255))
+            self.tela.blit(titulo,(350,70))
+
+            y = 220
+
+            for i,fase in enumerate(self.fases):
+
+                texto = fase["nome"]
+
+                if not fase["desbloqueada"]:
+                    texto += " (Bloqueada)"
+
+                if i == self.fase_selecionada:
+                    texto = "> " + texto
+                    cor = (0,255,0)
+                else:
+                    cor = (255,255,255)
+
+                render = fonte.render(texto,True,cor)
+
+                self.tela.blit(render,(350,y))
+
+                y += 90
+
+            pygame.display.update()
             return
 
         if self.estado == "creditos":

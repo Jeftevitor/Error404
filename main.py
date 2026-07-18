@@ -1,8 +1,5 @@
 from jogo import Jogo
 
-try:
+if __name__ == "__main__":
     jogo = Jogo()
     jogo.iniciar()
-
-except Exception as erro:
-    print(erro)
