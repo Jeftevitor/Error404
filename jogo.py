@@ -84,6 +84,15 @@ class Jogo:
         self.tempo_julgamento = 0
         self.duracao_exibicao = 500
 
+        self.vida = 100
+
+        self.barra_vida = pygame.image.load("Assets/Barras_de_vida/Joaildo(barra de vida - boy) (3).png").convert_alpha()
+        self.barra_vida = pygame.transform.smoothscale(
+        self.barra_vida,
+        (1200, 140)
+        )
+
+
     def verificar_toque(self):
         teclas = pygame.key.get_pressed()
         for tecla, direcao in teclas_setas.items():
@@ -282,6 +291,11 @@ class Jogo:
 
         self.tela.fill((0,0,0))
 
+        x = (self.largura - self.barra_vida.get_width()) // 2 - 40
+        y = self.altura - self.barra_vida.get_height() - 35
+
+        self.tela.blit(self.barra_vida, (x, y))
+
         self.seta_esquerda.desenhar(self.tela)
         self.seta_baixo.desenhar(self.tela)
         self.seta_cima.desenhar(self.tela)
@@ -294,6 +308,7 @@ class Jogo:
             self.pontuacao.desenhar(self.tela,self.ultimo_julgamento)
 
         pygame.display.update()
+
     def iniciar(self):
         while self.rodando:
             self.processa_eventos()
