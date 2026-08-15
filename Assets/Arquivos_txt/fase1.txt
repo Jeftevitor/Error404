@@ -1,4 +1,4 @@
-3000 esquerda
+3000 esquerda 
 3700 baixo
 4400 cima
 5100 direita

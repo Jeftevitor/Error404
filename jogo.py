@@ -84,14 +84,18 @@ class Jogo:
         self.tempo_julgamento = 0
         self.duracao_exibicao = 500
 
-        self.vida = 100
+        self.vida_jogador = 100
+        self.vida_professor = 100
 
-        self.barra_vida = pygame.image.load("Assets/Barras_de_vida/Joaildo(barra de vida - boy) (3).png").convert_alpha()
-        self.barra_vida = pygame.transform.smoothscale(
-        self.barra_vida,
-        (1200, 140)
-        )
+        self.barra_vida100 = pygame.image.load("Assets/Barras_de_vida/Joaildo(barra de vida - boy)100.png").convert_alpha()
+        self.barra_vida60 = pygame.image.load("Assets/Barras_de_vida/Joaildo(barra de vida - boy)60.png").convert_alpha()
+        self.barra_vida0 = pygame.image.load("Assets/Barras_de_vida/Joaildo(barra de vida - boy)0.png").convert_alpha()
+        self.barra_vidaj60 = pygame.image.load("Assets/Barras_de_vida/Joaildo(barra de vida - boy)j60.png").convert_alpha()
+        self.barra_vidaj0 = pygame.image.load("Assets/Barras_de_vida/Joaildo(barra de vida - boy)j0.png").convert_alpha()
 
+        self.barra_vida_atual = self.barra_vida100
+
+#=======================VERIFICAR TOQUE=====================
 
     def verificar_toque(self):
         teclas = pygame.key.get_pressed()
@@ -99,16 +103,23 @@ class Jogo:
             if teclas[tecla]:
                 receptor = self.receptores[direcao]
                 for seta in self.setas:
-                    if (seta.direcao == direcao and not seta.hit):
+                    if (seta.direcao == direcao and not seta.hit and seta.quem == "jogador"):
                         diferenca = abs(seta.y - receptor.y)
 
                         if (diferenca<= self.pontuacao.janela_ruim):
                             seta.hit = True
 
+                            self.vida_professor -= 5
+                            if self.vida_professor < 0:
+                                self.vida_professor = 0
+                            self.atualizar_barra_vida()
+
                             self.ultimo_julgamento = (self.pontuacao.calcular_pontos(diferenca))
                             self.tempo_julgamento =(pygame.time.get_ticks())
 
                             return
+                        
+#=======================PROCESSA EVENTOS=====================
 
     def processa_eventos(self):
         for evento in pygame.event.get():
@@ -154,6 +165,10 @@ class Jogo:
 
                         if fase["desbloqueada"]:
 
+                            self.vida_jogador = 100
+                            self.vida_professor = 100
+                            self.atualizar_barra_vida()
+
                             self.carregar_fase(fase["arquivo"])
 
                             pygame.mixer.music.stop()
@@ -172,17 +187,28 @@ class Jogo:
                     if evento.key == pygame.K_ESCAPE:
                         self.estado = "menu"
 
-    def carregar_fase(self, arquivo_txt):
+##=======================CARREGAR FASE=====================
 
+    def carregar_fase(self, arquivo_txt):
         self.notas = []
 
         with open(arquivo_txt, "r", encoding="utf-8") as arquivo:
             for linha in arquivo:
-                tempo, direcao = linha.strip().split()
-                self.notas.append((int(tempo), direcao))
+                partes = linha.strip().split()
+
+                if len(partes) == 3:
+                    tempo, direcao, quem = partes
+                else:
+                    tempo, direcao = partes
+                    quem = "jogador"
+
+                self.notas.append((int(tempo), direcao, quem))
 
         self.indice_nota = 0
         self.setas = []
+
+#=======================ATUALIZAR=====================
+
     def atualizar(self):
         if self.estado != "jogo":
             return
@@ -192,7 +218,7 @@ class Jogo:
         while (
             self.indice_nota < len(self.notas)
             and tempo >= self.notas[self.indice_nota][0]):
-            _, direcao = self.notas[self.indice_nota]
+            _, direcao, quem= self.notas[self.indice_nota]
 
             receptor = self.receptores[direcao]
 
@@ -206,15 +232,32 @@ class Jogo:
 
             receptor = self.receptores[seta.direcao]
 
-            if not seta.hit:
-                if seta.y > receptor.y + self.pontuacao.janela_ruim:
+            if seta.quem == "professor":
+                if not seta.hit and seta.y >= receptor.y:
                     seta.hit = True
-                    self.ultimo_julgamento = "errou"
-                    self.tempo_julgamento = pygame.time.get_ticks()
+
+                    self.vida_jogador -= 5
+                    if self.vida_jogador < 0:
+                        self.vida_jogador = 0
+                    self.atualizar_barra_vida()
+            else:
+
+                if not seta.hit:
+                    if seta.y > receptor.y + self.pontuacao.janela_ruim:
+                        seta.hit = True
+
+                        self.vida_jogador -= 10
+                        if self.vida_jogador < 0:
+                            self.vida_jogador = 0
+                        self.atualizar_barra_vida()
+
+                        self.ultimo_julgamento = "errou"
+                        self.tempo_julgamento = pygame.time.get_ticks()
 
             seta.acertou()
 
         self.verificar_toque()
+    
 
         if self.indice_nota >= len(self.notas):
 
@@ -231,12 +274,16 @@ class Jogo:
                     if not seta.hit:
                         todas = False
 
-                if todas:
+                if self.vida_jogador <= 0 or self.vida_professor <= 0:
+
                     self.estado = "selecao"
 
                     pygame.mixer.music.stop()
                     pygame.mixer.music.load("Assets/Music/Menu.ogg")
                     pygame.mixer.music.play(-1)
+
+#=======================DESENHAR=====================
+
     def desenhar(self):
         if self.estado == "intro":
             self.intro.desenhar(self.tela)
@@ -275,10 +322,8 @@ class Jogo:
                     cor = (255,255,255)
 
                 render = fonte.render(texto,True,cor)
-
-                self.tela.blit(render,(350,y))
-
-                y += 90
+                self.tela.blit(render, (350, y))
+                y += 70
 
             pygame.display.update()
             return
@@ -291,10 +336,10 @@ class Jogo:
 
         self.tela.fill((0,0,0))
 
-        x = (self.largura - self.barra_vida.get_width()) // 2 - 40
-        y = self.altura - self.barra_vida.get_height() - 35
+        x = (self.largura - self.barra_vida_atual.get_width()) // 2 - 40
+        y = self.altura - self.barra_vida_atual.get_height() - 35
 
-        self.tela.blit(self.barra_vida, (x, y))
+        self.tela.blit(self.barra_vida_atual, (x, y))
 
         self.seta_esquerda.desenhar(self.tela)
         self.seta_baixo.desenhar(self.tela)
@@ -309,6 +354,8 @@ class Jogo:
 
         pygame.display.update()
 
+#=======================INICIAR=====================
+
     def iniciar(self):
         while self.rodando:
             self.processa_eventos()
@@ -317,4 +364,24 @@ class Jogo:
 
             self.clock.tick(60)
 
-        pygame.quit()
+#=======================ATUALIZAR BARRA VIDA=====================
+
+    def atualizar_barra_vida(self):
+        #Professor ganhando do jogador
+        if self.vida_jogador < self.vida_professor:
+            if self.vida_jogador <= 0:
+                self.barra_vida_atual = self.barra_vidaj0
+            elif self.vida_jogador <= 60:
+                self.barra_vida_atual = self.barra_vida60
+            else:
+                self.barra_vida_atual = self.barra_vida100
+        #Professor perdendo do jogador
+        if self.vida_professor < self.vida_jogador:
+                    if self.vida_professor <= 0:
+                        self.barra_vida_atual = self.barra_vida0
+                    elif self.vida_professor <= 60:
+                        self.barra_vida_atual = self.barra_vidaj60
+                    else:
+                        self.barra_vida_atual = self.barra_vida100
+                        
+    #pygame.quit()

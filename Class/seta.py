@@ -1,10 +1,11 @@
 import pygame
 
 class Seta:
-    def __init__(self, x, y, direcao):
+    def __init__(self, x, y, direcao, quem="jogador"):
         self.x = x
         self.y = y
         self.direcao = direcao
+        self.quem = quem
         self.velocidade = 5
         self.hit = False
         
