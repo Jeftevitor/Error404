@@ -51,15 +51,49 @@ class TelaInicial:
         fonte = pygame.font.SysFont(None, 36)
         linhas = [
             "Créditos",
+            " ",
             "Desenvolvedores: Jefte Vitor e Isabela Nóbrega",
+            " ",
             "Design: Jefte Vitor e Isabela Nóbrega",
+            " ",
             "Música: Jefte Vitor",
-            "O Error404 é um jogo rítmico inspirado em Friday Night Funkin, ambientado no IFRN Campus Caicó, especialmente nos laboratórios de informática. A proposta é que o jogador enfrente professores em batalhas musicais para conseguir se formar no curso."
+            " ",
+            "O Error404 é um jogo rítmico inspirado em Friday Night Funkin, ambientado no IFRN Campus Caicó, especialmente nos laboratórios de informática. A proposta é que o jogador enfrente professores em batalhas musicais para conseguir se formar no curso.",
             "",
-            "Pressione qualquer tecla ou clique para voltar"
+            "Pressione a tecla Enter para voltar para tela de Menu"
         ]
+
+        largura_maxima = 1080
         y = 60
+
         for linha in linhas:
-            texto = fonte.render(linha, True, (255, 255, 255))
-            tela.blit(texto, (60, y))
-            y += 42
+            if fonte.size(linha)[0] <= largura_maxima:
+                texto = fonte.render(linha, True, (255, 255, 255))
+                tela.blit(texto, (60, y))
+                y += 42
+            else:
+                sublinhas = self.quebrar_texto(linha, fonte, largura_maxima)
+                for sublinha in sublinhas:
+                    texto = fonte.render(sublinha, True, (255, 255, 255))
+                    tela.blit(texto, (60, y))
+                    y += 42
+
+    def quebrar_texto(self, texto, fonte, largura_maxima):
+        palavras  = texto.split(" ")
+        linhas = []
+        linha_atual = ""
+
+        for palavra in palavras:
+            teste = (linha_atual + " " + palavra).strip()
+
+            if fonte.size(teste)[0] <= largura_maxima:
+                linha_atual = teste
+            else:
+                linhas.append(linha_atual)
+                linha_atual = palavra
+
+        linhas.append(linha_atual)
+
+        return linhas
+
+

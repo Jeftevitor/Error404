@@ -181,10 +181,10 @@ class Jogo:
 
                     elif evento.key == pygame.K_ESCAPE:
                         self.estado = "menu"
-
+        
             elif self.estado == "creditos":
                 if (evento.type== pygame.KEYDOWN):
-                    if evento.key == pygame.K_ESCAPE:
+                    if evento.key == pygame.K_RETURN:
                         self.estado = "menu"
 
 ##=======================CARREGAR FASE=====================
