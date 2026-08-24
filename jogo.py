@@ -41,7 +41,7 @@ class Jogo:
             {
                 "nome": "Romerito",
                 "arquivo": "Assets/Arquivos_txt/fase3.txt",
-                "musica": "Assets/Music/Romerito.ogg",
+                "musica": "Assets/Music/ROMERITO(Nuevayol- bad bunny).ogg",
                 "desbloqueada": False
             }
         ]
