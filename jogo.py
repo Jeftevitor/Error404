@@ -29,7 +29,7 @@ class Jogo:
             {
                 "nome": "Joaildo",
                 "arquivo": "Assets/Arquivos_txt/fase1.txt",
-                "musica": "Assets/Music/Joaildo.ogg",
+                "musica": "Assets/Music/JOJO(freak-ariana grande).ogg",
                 "desbloqueada": True
             },
             {
