@@ -14,6 +14,13 @@ class TelaInicial:
         # Logo
         self.img_l = pygame.image.load('Assets/Telas/logo.png').convert_alpha()
 
+        #Fundo de Creditos
+        self.img_c = pygame.image.load('Assets/Telas/fundo_creditos.png').convert_alpha()
+
+        #Bloco creditos
+
+        self.img_p = pygame.image.load('Assets/Telas/bloco_creditos.png').convert_alpha()
+
         self.img_b = {}
 
         for b in self.botoes:
@@ -27,8 +34,7 @@ class TelaInicial:
         }
 
     def desenhar(self, tela):
-        tela.fill((20, 20, 20))
-    
+
         fundo = pygame.transform.scale(self.img_f,(self.largura, self.altura))
 
         tela.blit(fundo, (0, 0))
@@ -47,36 +53,133 @@ class TelaInicial:
         return None
     
     def desenhar_creditos(self, tela):
-        tela.fill((20, 20, 20))
-        fonte = pygame.font.SysFont(None, 36)
-        linhas = [
-            "Créditos",
-            " ",
-            "Desenvolvedores: Jefte Vitor e Isabela Nóbrega",
-            " ",
-            "Design: Jefte Vitor e Isabela Nóbrega",
-            " ",
-            "Música: Jefte Vitor",
-            " ",
-            "O Error404 é um jogo rítmico inspirado em Friday Night Funkin, ambientado no IFRN Campus Caicó, especialmente nos laboratórios de informática. A proposta é que o jogador enfrente professores em batalhas musicais para conseguir se formar no curso.",
-            "",
-            "Pressione a tecla Enter para voltar para tela de Menu"
+
+        # fundo creditos
+        fundo = pygame.transform.scale(
+            self.img_c,
+            (self.largura, self.altura)
+        )
+        tela.blit(fundo, (0, 0))
+
+        # bloco de creditos
+        bloco = pygame.transform.scale(
+            self.img_p,
+            (1000, 580)
+        )
+
+        bloco_rect = bloco.get_rect(
+            center=(self.largura // 2, self.altura // 2)
+        )
+
+        tela.blit(bloco, bloco_rect)
+
+        # fonte em pixel
+        fonte = pygame.font.Font(
+            'Assets/Fontes/PressStart2P-Regular.ttf',
+            16
+        )
+
+        fonte_titulo = pygame.font.Font(
+            'Assets/Fontes/PressStart2P-Regular.ttf',
+            24
+        )
+
+        # titulo creditos
+        titulo = fonte_titulo.render(
+            "CRÉDITOS",
+            True,
+            (255, 255, 255)
+        )
+
+        titulo_rect = titulo.get_rect(
+            center=(self.largura // 2, bloco_rect.top + 45)
+        )
+
+        tela.blit(titulo, titulo_rect)
+
+        # Quem fez cada parte
+        secoes = [
+            ("DESENVOLVEDORES:", "Jefte Vitor e Isabela Nóbrega"),
+            ("DESIGN:", "Jefte Vitor e Isabela Nóbrega"),
+            ("MÚSICA:", "Jefte Vitor")
         ]
 
-        largura_maxima = 1080
-        y = 60
+        y = bloco_rect.top + 135
 
-        for linha in linhas:
-            if fonte.size(linha)[0] <= largura_maxima:
-                texto = fonte.render(linha, True, (255, 255, 255))
-                tela.blit(texto, (60, y))
-                y += 42
-            else:
-                sublinhas = self.quebrar_texto(linha, fonte, largura_maxima)
-                for sublinha in sublinhas:
-                    texto = fonte.render(sublinha, True, (255, 255, 255))
-                    tela.blit(texto, (60, y))
-                    y += 42
+        for titulo_secao, nomes in secoes:
+
+            texto_titulo = fonte.render(
+                titulo_secao,
+                True,
+                (0, 0, 0)
+            )
+
+            rect_titulo = texto_titulo.get_rect(
+                center=(self.largura // 2, y)
+            )
+
+            tela.blit(texto_titulo, rect_titulo)
+
+            y += 22
+
+            texto_nomes = fonte.render(
+                nomes,
+                True,
+                (0, 0, 0)
+            )
+
+            rect_nomes = texto_nomes.get_rect(
+                center=(self.largura // 2, y)
+            )
+
+            tela.blit(texto_nomes, rect_nomes)
+
+            y += 32
+
+        # Descrição do jogo
+        descricao = (
+            "O Error404 é um jogo rítmico inspirado em Friday Night Funkin, "
+            "ambientado no IFRN Campus Caicó, especialmente nos laboratórios "
+            "de informática. A proposta é que o jogador enfrente professores "
+            "em batalhas musicais para conseguir se formar no curso."
+        )
+
+        largura_maxima = 700
+
+        sublinhas = self.quebrar_texto(
+            descricao,
+            fonte,
+            largura_maxima
+        )
+
+        for sublinha in sublinhas:
+
+            texto = fonte.render(
+                sublinha,
+                True,
+                (0, 0, 0)
+            )
+
+            rect_texto = texto.get_rect(
+                center=(self.largura // 2, y)
+            )
+
+            tela.blit(texto, rect_texto)
+
+            y += 20
+
+        # Sair
+        enter = fonte.render(
+            "Pressione ENTER para voltar ao Menu",
+            True,
+            (255, 255, 255)
+        )
+
+        enter_rect = enter.get_rect(
+            center=(self.largura // 2, self.altura - 35)
+        )
+
+        tela.blit(enter, enter_rect)
 
     def quebrar_texto(self, texto, fonte, largura_maxima):
         palavras  = texto.split(" ")
