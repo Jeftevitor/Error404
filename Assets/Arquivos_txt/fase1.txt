@@ -1,64 +1,134 @@
-3000 esquerda 
-3700 baixo
-4400 cima
-5100 direita
-5800 esquerda
-6500 baixo
-7200 cima
-7900 direita
-8600 esquerda
-9300 baixo
-10000 cima
-10700 direita
-11400 esquerda
-12100 baixo
-12800 cima
-13500 direita
-14200 esquerda
-14900 baixo
-15600 cima
-16300 direita
-17000 esquerda
-17700 baixo
-18400 cima
-19100 direita
-19800 esquerda
-20500 baixo
-21200 cima
-21900 direita
-22600 esquerda
-23300 baixo
-24000 cima
-24700 direita
-25400 esquerda
-26100 baixo
-26800 cima
-27500 direita
-28200 esquerda
-28900 baixo
-29600 cima
-30300 direita
-31000 esquerda
-31700 baixo
-32400 cima
-33100 direita
-33800 esquerda
-34500 baixo
-35200 cima
-35900 direita
-36600 esquerda
-37300 baixo
-38000 cima
-38700 direita
-39400 esquerda
-40100 baixo
-40800 cima
-41500 direita
-42200 esquerda
-42900 baixo
-43600 cima
-44300 direita
-45000 esquerda
-45700 baixo
-46400 cima
-47100 direita
+19739 esquerda professor
+20621 baixo professor
+21503 direita professor
+22084 baixo professor
+22966 esquerda jogador
+24429 direita jogador
+25311 esquerda jogador
+26194 baixo jogador
+26774 esquerda professor
+27680 baixo professor
+28562 esquerda professor
+29143 direita professor
+30025 baixo jogador
+30907 esquerda jogador
+32370 baixo jogador
+33253 esquerda jogador
+33856 baixo professor
+34715 esquerda professor
+35621 baixo professor
+36201 esquerda professor
+37084 baixo jogador
+37966 esquerda jogador
+38547 cima jogador
+39429 baixo jogador
+40010 cima professor
+40311 esquerda professor
+40915 baixo professor
+41797 direita professor
+42355 cima jogador
+42657 direita jogador
+43260 baixo jogador
+44143 direita jogador
+45025 baixo professor
+45606 esquerda professor
+46186 cima professor
+46488 baixo professor
+47068 direita jogador
+47301 cima jogador
+47974 direita jogador
+48856 esquerda jogador
+49715 baixo professor
+50296 cima professor
+51202 direita professor
+52084 baixo professor
+52664 direita jogador
+53547 baixo jogador
+54429 esquerda jogador
+55102 baixo jogador
+55706 cima professor
+55985 esquerda professor
+56287 baixo professor
+56589 cima professor
+56867 direita jogador
+57471 esquerda jogador
+58051 cima jogador
+58353 esquerda jogador
+58632 baixo professor
+59236 cima professor
+59816 esquerda professor
+60397 cima professor
+60699 esquerda jogador
+61000 baixo jogador
+61279 cima jogador
+61581 esquerda jogador
+61883 baixo professor
+62161 esquerda professor
+62765 cima professor
+63044 esquerda professor
+63346 baixo jogador
+63647 cima jogador
+63926 direita jogador
+64530 esquerda jogador
+65110 cima professor
+65412 esquerda professor
+65691 baixo professor
+66295 cima professor
+66875 esquerda jogador
+67456 cima jogador
+67757 esquerda jogador
+68059 baixo jogador
+68640 cima professor
+69220 esquerda professor
+69824 cima professor
+70103 baixo professor
+70404 esquerda jogador
+70706 cima jogador
+70985 baixo jogador
+71287 direita jogador
+71589 baixo professor
+72169 direita professor
+72471 esquerda professor
+72750 direita professor
+73353 cima jogador
+73934 direita jogador
+74514 cima jogador
+74816 esquerda jogador
+75118 direita professor
+75699 cima professor
+76279 direita professor
+76883 cima professor
+77161 baixo jogador
+77463 direita jogador
+78044 cima jogador
+78648 esquerda jogador
+79228 cima professor
+79530 esquerda professor
+79809 baixo professor
+80110 cima professor
+80412 esquerda jogador
+80714 baixo jogador
+80993 esquerda jogador
+81573 cima jogador
+81875 esquerda professor
+82177 baixo professor
+82479 esquerda professor
+82757 cima professor
+83338 esquerda jogador
+83942 cima jogador
+84220 esquerda jogador
+84522 baixo jogador
+84824 direita professor
+85103 esquerda professor
+85706 direita professor
+86287 cima professor
+86589 esquerda jogador
+86867 direita jogador
+87471 cima jogador
+88052 esquerda jogador
+88632 direita professor
+88934 esquerda professor
+89236 direita professor
+89514 cima professor
+89816 direita jogador
+90118 baixo jogador

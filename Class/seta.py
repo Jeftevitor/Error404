@@ -21,7 +21,7 @@ class Seta:
         elif self.direcao == 'baixo':
             self.imagem = pygame.image.load('Assets/Sprites/baixo.png').convert_alpha()
             
-        self.imagem = pygame.transform.scale(self.imagem,(210, 200))
+        self.imagem = pygame.transform.scale(self.imagem,(180, 160))
         
     def acertou(self):
         if self.hit:
