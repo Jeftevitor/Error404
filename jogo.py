@@ -4,6 +4,10 @@ from Class.pontuacao import Pontuacao
 from Class.tela_inicial import TelaInicial
 from Class.intro import Intro
 from Class.barra_vida import BarraVida
+from Class.fase import Fase
+from Class.sinc import Sinc
+
+MUSICA_MENU = 'Assets/Music/MENU(Desmitificar- Marina sena).ogg'
 
 teclas_setas = {
     pygame.K_LEFT: 'esquerda',
@@ -16,13 +20,8 @@ class Jogo:
     def __init__(self):
         pygame.init()
         pygame.mixer.init()
-        pygame.mixer.music.load('Assets/Music/Menu.ogg')
+        pygame.mixer.music.load(MUSICA_MENU)
         pygame.mixer.music.play(-1)
-
-        self.turno_atual = None
-        self.tempo_aviso = 0
-        self.duracao_aviso = 1200
-        self.fonte_aviso = pygame.font.SysFont(None, 80)
 
         self.largura = 1200
         self.altura = 720
@@ -31,26 +30,8 @@ class Jogo:
 
         self.fase_selecionada = 0
 
-        self.fases = [
-            {
-                "nome": "Joaildo",
-                "arquivo": "Assets/Arquivos_txt/fase1.txt",
-                "musica": "Assets/Music/JOJO(freak-ariana grande).ogg",
-                "desbloqueada": True
-            },
-            {
-                "nome": "Max e Hugo",
-                "arquivo": "Assets/Arquivos_txt/fase2.txt",
-                "musica": "Assets/Music/Max_e_Hugo.ogg",
-                "desbloqueada": False
-            },
-            {
-                "nome": "Romerito",
-                "arquivo": "Assets/Arquivos_txt/fase3.txt",
-                "musica": "Assets/Music/ROMERITO(Nuevayol- bad bunny).ogg",
-                "desbloqueada": False
-            }
-        ]
+        self.fase = Fase()
+        self.fases = self.fase.fases
 
         self.tela = pygame.display.set_mode(
             (self.largura, self.altura)
@@ -102,9 +83,16 @@ class Jogo:
 
         self.pontuacao = Pontuacao()
 
+        self.sinc = Sinc(self)
+
         self.ultimo_julgamento = ""
         self.tempo_julgamento = 0
         self.duracao_exibicao = 500
+
+        self.turno_atual = None
+        self.tempo_aviso = 0
+        self.duracao_aviso = 1500
+        self.fonte_aviso = pygame.font.SysFont(None, 50)
 
 #=======================VERIFICAR TOQUE=====================
 
@@ -164,7 +152,7 @@ class Jogo:
                             self.fase_selecionada -= 1
 
                     elif evento.key == pygame.K_DOWN:
-                        if self.fase_selecionada < 2:
+                        if self.fase_selecionada < len(self.fases) - 1:
                             self.fase_selecionada += 1
 
                     elif evento.key == pygame.K_RETURN:
@@ -196,23 +184,15 @@ class Jogo:
                     if evento.key == pygame.K_RETURN:
                         self.estado = "menu"
 
+            elif self.estado == "jogo":
+                if evento.type == pygame.KEYDOWN:
+                    if evento.key == pygame.K_ESCAPE:
+                        self._encerrar_fase(venceu=False)
+
 ##=======================CARREGAR FASE=====================
 
     def carregar_fase(self, arquivo_txt):
-        self.notas = []
-
-        with open(arquivo_txt, "r", encoding="utf-8") as arquivo:
-            for linha in arquivo:
-                partes = linha.strip().split()
-
-                if len(partes) == 3:
-                    tempo, direcao, quem = partes
-                else:
-                    tempo, direcao = partes
-                    quem = "jogador"
-
-                self.notas.append((int(tempo), direcao, quem))
-
+        self.notas = self.fase.carregar_fase(arquivo_txt)
         self.indice_nota = 0
         self.setas = []
 
@@ -263,33 +243,30 @@ class Jogo:
 
             seta.acertou()
 
+        self.sinc.verificar_sinc(self.setas)
+
         self.barra_vida.atualizar()
 
         self.verificar_toque()
-    
 
-        if self.indice_nota >= len(self.notas):
+        acabou_a_musica = self.indice_nota >= len(self.notas)
+        todas_setas_resolvidas = all(seta.hit for seta in self.setas)
 
-            if self.fase_selecionada < len(self.fases)-1:
-                self.fases[self.fase_selecionada+1]["desbloqueada"] = True
+        if self.barra_vida.jogador_perdeu() or self.barra_vida.professor_perdeu():
+            self._encerrar_fase(venceu=False)
 
-        if len(self.notas) > 0:
+        elif acabou_a_musica and todas_setas_resolvidas:
+            self._encerrar_fase(venceu=True)
 
-            if self.indice_nota >= len(self.notas):
+    def _encerrar_fase(self, venceu):
+        if venceu:
+            self.fase.desbloquear_proxima(self.fase_selecionada)
 
-                todas = True
+        self.estado = "selecao"
 
-                for seta in self.setas:
-                    if not seta.hit:
-                        todas = False
-
-                if self.barra_vida.jogador_perdeu() or self.barra_vida.professor_perdeu():
-
-                    self.estado = "selecao"
-
-                    pygame.mixer.music.stop()
-                    pygame.mixer.music.load("Assets/Music/Menu.ogg")
-                    pygame.mixer.music.play(-1)
+        pygame.mixer.music.stop()
+        pygame.mixer.music.load(MUSICA_MENU)
+        pygame.mixer.music.play(-1)
 
 #=======================DESENHAR=====================
 
@@ -301,7 +278,7 @@ class Jogo:
             return
 
         if self.estado == "menu":
-            self.tela_inicial.desenhar(    self.tela)
+            self.tela_inicial.desenhar(self.tela)
             pygame.display.update()
 
             return

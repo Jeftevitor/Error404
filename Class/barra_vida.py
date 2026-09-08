@@ -1,8 +1,6 @@
 import pygame
 
-
 class BarraVida:
-
     def __init__(self, x, y, largura, altura, vida_maxima=100):
         self.x = x
         self.y = y
