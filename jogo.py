@@ -89,10 +89,13 @@ class Jogo:
         self.tempo_julgamento = 0
         self.duracao_exibicao = 500
 
-        self.turno_atual = None
-        self.tempo_aviso = 0
-        self.duracao_aviso = 1500
-        self.fonte_aviso = pygame.font.SysFont(None, 50)
+#=======================CONTAGEM=====================
+        self.contagem_textos = ["3", "2", "1", "VAI!"]
+        self.contagem_duracao_etapa = 700
+        self.tempo_contagem_inicio = 0
+        self.fase_pendente = None
+        self.fonte_contagem = pygame.font.Font(None, 150)
+        self.contagem_audio = pygame.mixer.Sound('Assets/Music/321Go.ogg')
 
 #=======================VERIFICAR TOQUE=====================
 
@@ -166,15 +169,12 @@ class Jogo:
                             self.carregar_fase(fase["arquivo"])
 
                             pygame.mixer.music.stop()
-                            pygame.mixer.music.load(fase["musica"])
-                            pygame.mixer.music.play()
+                            self.contagem_audio.play()
 
-                            self.tempo_inicio = pygame.time.get_ticks()
+                            self.fase_pendente = fase
+                            self.tempo_contagem_inicio = pygame.time.get_ticks()
 
-                            self.turno_atual = None
-                            self.tempo_aviso = 0
-
-                            self.estado = "jogo"
+                            self.estado = "contagem"
 
                     elif evento.key == pygame.K_ESCAPE:
                         self.estado = "menu"
@@ -183,6 +183,12 @@ class Jogo:
                 if (evento.type== pygame.KEYDOWN):
                     if evento.key == pygame.K_RETURN:
                         self.estado = "menu"
+
+            elif self.estado == "contagem":
+                if evento.type == pygame.KEYDOWN:
+                    if evento.key == pygame.K_ESCAPE:
+                        self.fase_pendente = None
+                        self.estado = "selecao"
 
             elif self.estado == "jogo":
                 if evento.type == pygame.KEYDOWN:
@@ -199,24 +205,22 @@ class Jogo:
 #=======================ATUALIZAR=====================
 
     def atualizar(self):
+        if self.estado == "contagem":
+            self._atualizar_contagem()
+            return
+
         if self.estado != "jogo":
             return
 
-        tempo = (pygame.time.get_ticks()- self.tempo_inicio)
+        tempo = pygame.time.get_ticks() - self.tempo_inicio
 
-        while (
-            self.indice_nota < len(self.notas)
-            and tempo >= self.notas[self.indice_nota][0]):
-            _, direcao, quem= self.notas[self.indice_nota]
-
-            if quem != self.turno_atual:
-                self.turno_atual = quem
-                self.tempo_aviso = pygame.time.get_ticks()
-
+        while self.indice_nota < len(self.notas) and tempo >= self.notas[self.indice_nota][0]:
+            _, direcao = self.notas[self.indice_nota]
             receptor = self.receptores[direcao]
 
             self.setas.append(
-                Seta(receptor.x,-100,direcao, quem))
+                Seta(receptor.x, -100, direcao)
+            )
 
             self.indice_nota += 1
 
@@ -258,6 +262,22 @@ class Jogo:
         elif acabou_a_musica and todas_setas_resolvidas:
             self._encerrar_fase(venceu=True)
 
+    #=======================ATUALIZAR CONTAGEM=====================
+    def _atualizar_contagem(self):
+        tempo_decorrido = pygame.time.get_ticks() - self.tempo_contagem_inicio
+        duracao_total = len(self.contagem_textos) * self.contagem_duracao_etapa
+
+        if tempo_decorrido >= duracao_total:
+            self.contagem_audio.stop()
+            pygame.mixer.music.load(self.fase_pendente["musica"])
+            pygame.mixer.music.play()
+
+            self.tempo_inicio = pygame.time.get_ticks()
+            self.fase_pendente = None
+
+            self.estado = "jogo"
+
+    #=======================ENCERRAR FASE=====================
     def _encerrar_fase(self, venceu):
         if venceu:
             self.fase.desbloquear_proxima(self.fase_selecionada)
@@ -320,6 +340,25 @@ class Jogo:
 
             return
 
+        if self.estado == "contagem":
+            self.tela.blit(self.fundo_jogo, (0, 0))
+
+            tempo_decorrido = pygame.time.get_ticks() - self.tempo_contagem_inicio
+            indice = min(
+                tempo_decorrido // self.contagem_duracao_etapa,
+                len(self.contagem_textos) - 1
+            )
+
+            texto_contagem = self.contagem_textos[indice]
+
+            render = self.fonte_contagem.render(texto_contagem, True, (255, 255, 255))
+            rect = render.get_rect(center=(self.largura // 2, self.altura // 2))
+
+            self.tela.blit(render, rect)
+
+            pygame.display.update()
+            return
+
         self.tela.blit(self.fundo_jogo, (0, 0))
 
         self.barra_vida.desenhar(self.tela)
@@ -334,18 +373,6 @@ class Jogo:
 
         if (pygame.time.get_ticks()- self.tempo_julgamento< self.duracao_exibicao):
             self.pontuacao.desenhar(self.tela,self.ultimo_julgamento)
-
-        if (pygame.time.get_ticks() - self.tempo_aviso) < self.duracao_aviso:
-            if self.turno_atual == "professor":
-                texto_aviso = "VEZ DO PROFESSOR"
-                cor_aviso = (255, 100, 100)
-            else:
-                texto_aviso = "SUA VEZ!"
-                cor_aviso = (100, 255, 100)
-
-            render_aviso = self.fonte_aviso.render(texto_aviso, True, cor_aviso)
-            rect_aviso = render_aviso.get_rect(center=(self.largura // 2, 150))
-            self.tela.blit(render_aviso, rect_aviso)
 
         pygame.display.update()
 

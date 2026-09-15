@@ -4,19 +4,19 @@ class Fase:
             {
                 "nome": "Joaildo",
                 "arquivo": "Assets/Arquivos_txt/fase1.txt",
-                "musica": "Assets/Music/JOJO(freak-ariana grande).ogg",
+                "musica": "Assets/Music/JOJO(Freak-Ariana grande).ogg",
                 "desbloqueada": True
             },
             {
                 "nome": "Max e Hugo",
                 "arquivo": "Assets/Arquivos_txt/fase2.txt",
-                "musica": "Assets/Music/Max_e_Hugo.ogg",
+                "musica": "Assets/Music/MAX_HUGO(Passeios noturnos- Jão).ogg",
                 "desbloqueada": False
             },
             {
                 "nome": "Romerito",
                 "arquivo": "Assets/Arquivos_txt/fase3.txt",
-                "musica": "Assets/Music/ROMERITO(Nuevayol- bad bunny).ogg",
+                "musica": "Assets/Music/ROMERITO(Nuevayol- Bad bunny).ogg",
                 "desbloqueada": False
             }
         ]
@@ -44,15 +44,13 @@ class Fase:
                 if not partes:
                     continue
 
-                if len(partes) == 3:
-                    tempo, direcao, quem = partes
-                elif len(partes) == 2:
+                if len(partes) == 2:
                     tempo, direcao = partes
-                    quem = "jogador"
-                else:
-                    continue
 
-                self.notas.append((int(tempo), direcao, quem))
+                    self.notas.append(
+                        (int(tempo), direcao)
+                    )
 
         self.indice_nota = 0
+
         return self.notas
