@@ -384,4 +384,4 @@ class Jogo:
                     else:
                         self.barra_vida_atual = self.barra_vida100
                         
-    #pygame.quit()
+    pygame.quit()

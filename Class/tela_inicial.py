@@ -51,7 +51,9 @@ class TelaInicial:
             if rect.collidepoint(pos):
                 return nome
         return None
-    
+
+
+    #----CREDITOS----
     def desenhar_creditos(self, tela):
 
         # fundo creditos
