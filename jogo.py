@@ -97,26 +97,35 @@ class Jogo:
         self.fonte_contagem = pygame.font.Font(None, 150)
         self.contagem_audio = pygame.mixer.Sound('Assets/Music/321Go.ogg')
 
-#=======================VERIFICAR TOQUE=====================
+#=======================PROCESSAR TOQUE=====================
 
-    def verificar_toque(self):
-        teclas = pygame.key.get_pressed()
-        for tecla, direcao in teclas_setas.items():
-            if teclas[tecla]:
-                receptor = self.receptores[direcao]
-                for seta in self.setas:
-                    if (seta.direcao == direcao and not seta.hit and seta.quem == "jogador"):
-                        diferenca = abs(seta.y - receptor.y)
+    def processar_toque(self, direcao):
+        receptor = self.receptores[direcao]
 
-                        if (diferenca<= self.pontuacao.janela_ruim):
-                            seta.hit = True
+        seta_alvo = None
+        menor_diferenca = None
 
-                            self.barra_vida.dano_professor(5)
+        for seta in self.setas:
+            if seta.direcao == direcao and not seta.hit and seta.quem == "jogador":
+                diferenca = abs(seta.y - receptor.y)
 
-                            self.ultimo_julgamento = (self.pontuacao.calcular_pontos(diferenca))
-                            self.tempo_julgamento =(pygame.time.get_ticks())
+                if diferenca <= self.pontuacao.janela_ruim:
+                    if menor_diferenca is None or diferenca < menor_diferenca:
+                        menor_diferenca = diferenca
+                        seta_alvo = seta
 
-                            return
+        if seta_alvo is not None:
+            seta_alvo.hit = True
+
+            self.barra_vida.dano_professor(5)
+
+            self.ultimo_julgamento = self.pontuacao.calcular_pontos(menor_diferenca)
+            self.tempo_julgamento = pygame.time.get_ticks()
+        else:
+            self.barra_vida.dano_jogador(10)
+
+            self.ultimo_julgamento = "errou"
+            self.tempo_julgamento = pygame.time.get_ticks()
                         
 #=======================PROCESSA EVENTOS=====================
 
@@ -195,6 +204,9 @@ class Jogo:
                     if evento.key == pygame.K_ESCAPE:
                         self._encerrar_fase(venceu=False)
 
+                    elif evento.key in teclas_setas:
+                        self.processar_toque(teclas_setas[evento.key])
+
 ##=======================CARREGAR FASE=====================
 
     def carregar_fase(self, arquivo_txt):
@@ -251,12 +263,10 @@ class Jogo:
 
         self.barra_vida.atualizar()
 
-        self.verificar_toque()
-
         acabou_a_musica = self.indice_nota >= len(self.notas)
         todas_setas_resolvidas = all(seta.hit for seta in self.setas)
 
-        if self.barra_vida.jogador_perdeu() or self.barra_vida.professor_perdeu():
+        if self.barra_vida.jogador_perdeu():
             self._encerrar_fase(venceu=False)
 
         elif acabou_a_musica and todas_setas_resolvidas:
