@@ -7,7 +7,9 @@ from Class.barra_vida import BarraVida
 from Class.fase import Fase
 from Class.sinc import Sinc
 
+
 MUSICA_MENU = 'Assets/Music/MENU(Desmitificar- Marina sena).ogg'
+
 
 teclas_setas = {
     pygame.K_LEFT: 'esquerda',
@@ -16,10 +18,13 @@ teclas_setas = {
     pygame.K_RIGHT: 'direita'
 }
 
+
 class Jogo:
+
     def __init__(self):
         pygame.init()
         pygame.mixer.init()
+
         pygame.mixer.music.load(MUSICA_MENU)
         pygame.mixer.music.play(-1)
 
@@ -39,33 +44,88 @@ class Jogo:
 
         pygame.display.set_caption("Error404")
 
-        self.tela_inicial = TelaInicial(self.largura,self.altura)
+        self.tela_inicial = TelaInicial(
+            self.largura,
+            self.altura
+        )
 
-        self.intro = Intro(self.largura,self.altura)
+        self.intro = Intro(
+            self.largura,
+            self.altura
+        )
 
         self.clock = pygame.time.Clock()
         self.rodando = True
 
-        self.fundo_jogo = pygame.image.load("Assets/Telas/fundo_joaildo.png").convert()
-        self.fundo_jogo = pygame.transform.scale(self.fundo_jogo, (self.largura, self.altura))
+        # ======================= FUNDO =======================
+
+        self.fundo_jogo = pygame.image.load(
+            "Assets/Telas/fundo_joaildo.png"
+        ).convert()
+
+        self.fundo_jogo = pygame.transform.scale(
+            self.fundo_jogo,
+            (self.largura, self.altura)
+        )
+
+        # ======================= BARRA DE VIDA =======================
 
         largura_barra = 750
         altura_barra = 45
-        x_barra = (self.largura - largura_barra) // 2
-        y_barra = self.altura - altura_barra - 35
 
-        self.barra_vida = BarraVida(x_barra, y_barra, largura_barra, altura_barra)
+        x_barra = (
+            self.largura - largura_barra
+        ) // 2
 
+        y_barra = (
+            self.altura - altura_barra - 35
+        )
 
-        largura_seta = 150  
+        self.barra_vida = BarraVida(
+            x_barra,
+            y_barra,
+            largura_barra,
+            altura_barra
+        )
+
+        # ======================= SETAS =======================
+
+        largura_seta = 150
         espaco_entre_setas = 160
         centro_x = self.largura // 2
         y_setas = y_barra - 160
 
-        self.seta_esquerda = Seta(centro_x - int(espaco_entre_setas * 1.5) - largura_seta // 2, y_setas, "esquerda")
-        self.seta_baixo = Seta(centro_x - int(espaco_entre_setas * 0.5) - largura_seta // 2, y_setas, "baixo")
-        self.seta_cima = Seta(centro_x + int(espaco_entre_setas * 0.5) - largura_seta // 2, y_setas, "cima")
-        self.seta_direita = Seta(centro_x + int(espaco_entre_setas * 1.5) - largura_seta // 2, y_setas, "direita")
+        self.seta_esquerda = Seta(
+            centro_x
+            - int(espaco_entre_setas * 1.5)
+            - largura_seta // 2,
+            y_setas,
+            "esquerda"
+        )
+
+        self.seta_baixo = Seta(
+            centro_x
+            - int(espaco_entre_setas * 0.5)
+            - largura_seta // 2,
+            y_setas,
+            "baixo"
+        )
+
+        self.seta_cima = Seta(
+            centro_x
+            + int(espaco_entre_setas * 0.5)
+            - largura_seta // 2,
+            y_setas,
+            "cima"
+        )
+
+        self.seta_direita = Seta(
+            centro_x
+            + int(espaco_entre_setas * 1.5)
+            - largura_seta // 2,
+            y_setas,
+            "direita"
+        )
 
         self.receptores = {
             "esquerda": self.seta_esquerda,
@@ -76,10 +136,14 @@ class Jogo:
 
         self.setas = []
 
+        # ======================= NOTAS =======================
+
         self.notas = []
 
         self.indice_nota = 0
         self.tempo_inicio = 0
+
+        # ======================= PONTUAÇÃO =======================
 
         self.pontuacao = Pontuacao()
 
@@ -89,59 +153,119 @@ class Jogo:
         self.tempo_julgamento = 0
         self.duracao_exibicao = 500
 
-#=======================CONTAGEM=====================
-        self.contagem_textos = ["3", "2", "1", "VAI!"]
+        # ======================= CONTAGEM =======================
+
+        self.contagem_textos = [
+            "3",
+            "2",
+            "1",
+            "VAI!"
+        ]
+
         self.contagem_duracao_etapa = 700
         self.tempo_contagem_inicio = 0
-        self.fase_pendente = None
-        self.fonte_contagem = pygame.font.Font(None, 150)
-        self.contagem_audio = pygame.mixer.Sound('Assets/Music/321Go.ogg')
 
-#=======================PROCESSAR TOQUE=====================
+        self.fase_pendente = None
+
+        self.fonte_contagem = pygame.font.Font(
+            None,
+            150
+        )
+
+        self.contagem_audio = pygame.mixer.Sound(
+            'Assets/Music/321Go.ogg'
+        )
+
+    # =========================================================
+    # PROCESSAR TOQUE
+    # =========================================================
 
     def processar_toque(self, direcao):
+
         receptor = self.receptores[direcao]
 
         seta_alvo = None
         menor_diferenca = None
 
         for seta in self.setas:
-            if seta.direcao == direcao and not seta.hit and seta.quem == "jogador":
-                diferenca = abs(seta.y - receptor.y)
+
+            if (
+                seta.direcao == direcao
+                and not seta.hit
+                and seta.quem == "jogador"
+            ):
+
+                diferenca = abs(
+                    seta.y - receptor.y
+                )
 
                 if diferenca <= self.pontuacao.janela_ruim:
-                    if menor_diferenca is None or diferenca < menor_diferenca:
+
+                    if (
+                        menor_diferenca is None
+                        or diferenca < menor_diferenca
+                    ):
                         menor_diferenca = diferenca
                         seta_alvo = seta
 
+        # ======================= ACERTO =======================
+
         if seta_alvo is not None:
+
             seta_alvo.hit = True
 
-            self.barra_vida.dano_professor(5)
+            # Acertou: jogador recupera um pouco de vida
+            self.barra_vida.acerto()
 
-            self.ultimo_julgamento = self.pontuacao.calcular_pontos(menor_diferenca)
+            self.ultimo_julgamento = (
+                self.pontuacao.calcular_pontos(
+                    menor_diferenca
+                )
+            )
+
             self.tempo_julgamento = pygame.time.get_ticks()
+
+        # ======================= ERRO =======================
+
         else:
-            self.barra_vida.dano_jogador(10)
+
+            # Apertou sem ter seta para acertar: tira um pouco de vida.
+            # (A seta perdida continua causando o dano maior no atualizar().)
+            self.barra_vida.toque_errado()
 
             self.ultimo_julgamento = "errou"
+
             self.tempo_julgamento = pygame.time.get_ticks()
-                        
-#=======================PROCESSA EVENTOS=====================
+
+    # =========================================================
+    # PROCESSA EVENTOS
+    # =========================================================
 
     def processa_eventos(self):
+
         for evento in pygame.event.get():
+
             if evento.type == pygame.QUIT:
                 self.rodando = False
 
+            # ======================= INTRO =======================
+
             if self.estado == "intro":
-                if (evento.type== pygame.KEYDOWN):
+
+                if evento.type == pygame.KEYDOWN:
+
                     if evento.key == pygame.K_RETURN:
                         self.estado = "menu"
 
+            # ======================= MENU =======================
+
             elif self.estado == "menu":
-                if (evento.type== pygame.MOUSEBUTTONDOWN):
-                    botao = (self.tela_inicial.verificar_clique(evento.pos))
+
+                if evento.type == pygame.MOUSEBUTTONDOWN:
+
+                    botao = self.tela_inicial.verificar_clique(
+                        evento.pos
+                    )
 
                     if botao == "comecar":
                         self.estado = "selecao"
@@ -155,176 +279,351 @@ class Jogo:
                     elif botao == "sair":
                         self.rodando = False
 
+            # ======================= SELEÇÃO =======================
+
             elif self.estado == "selecao":
 
                 if evento.type == pygame.KEYDOWN:
 
                     if evento.key == pygame.K_UP:
+
                         if self.fase_selecionada > 0:
                             self.fase_selecionada -= 1
 
                     elif evento.key == pygame.K_DOWN:
-                        if self.fase_selecionada < len(self.fases) - 1:
+
+                        if (
+                            self.fase_selecionada
+                            < len(self.fases) - 1
+                        ):
                             self.fase_selecionada += 1
 
                     elif evento.key == pygame.K_RETURN:
 
-                        fase = self.fases[self.fase_selecionada]
+                        fase = self.fases[
+                            self.fase_selecionada
+                        ]
 
                         if fase["desbloqueada"]:
 
                             self.barra_vida.reset()
 
-                            self.carregar_fase(fase["arquivo"])
+                            self.carregar_fase(
+                                fase["arquivo"]
+                            )
 
                             pygame.mixer.music.stop()
+
                             self.contagem_audio.play()
 
                             self.fase_pendente = fase
-                            self.tempo_contagem_inicio = pygame.time.get_ticks()
+
+                            self.tempo_contagem_inicio = (
+                                pygame.time.get_ticks()
+                            )
 
                             self.estado = "contagem"
 
                     elif evento.key == pygame.K_ESCAPE:
+
                         self.estado = "menu"
-        
+
+            # ======================= CRÉDITOS =======================
+
             elif self.estado == "creditos":
-                if (evento.type== pygame.KEYDOWN):
+
+                if evento.type == pygame.KEYDOWN:
+
                     if evento.key == pygame.K_RETURN:
                         self.estado = "menu"
 
+            # ======================= CONTAGEM =======================
+
             elif self.estado == "contagem":
+
                 if evento.type == pygame.KEYDOWN:
+
                     if evento.key == pygame.K_ESCAPE:
+
                         self.fase_pendente = None
                         self.estado = "selecao"
 
+            # ======================= JOGO =======================
+
             elif self.estado == "jogo":
+
                 if evento.type == pygame.KEYDOWN:
+
                     if evento.key == pygame.K_ESCAPE:
-                        self._encerrar_fase(venceu=False)
+
+                        self._encerrar_fase(
+                            venceu=False
+                        )
 
                     elif evento.key in teclas_setas:
-                        self.processar_toque(teclas_setas[evento.key])
 
-##=======================CARREGAR FASE=====================
+                        self.processar_toque(
+                            teclas_setas[evento.key]
+                        )
+
+    # =========================================================
+    # CARREGAR FASE
+    # =========================================================
 
     def carregar_fase(self, arquivo_txt):
-        self.notas = self.fase.carregar_fase(arquivo_txt)
+
+        self.notas = self.fase.carregar_fase(
+            arquivo_txt
+        )
+
         self.indice_nota = 0
         self.setas = []
 
-#=======================ATUALIZAR=====================
+    # =========================================================
+    # ATUALIZAR
+    # =========================================================
 
     def atualizar(self):
+
         if self.estado == "contagem":
+
             self._atualizar_contagem()
             return
 
         if self.estado != "jogo":
             return
 
-        tempo = pygame.time.get_ticks() - self.tempo_inicio
+        tempo = (
+            pygame.time.get_ticks()
+            - self.tempo_inicio
+        )
 
-        while self.indice_nota < len(self.notas) and tempo >= self.notas[self.indice_nota][0]:
-            _, direcao = self.notas[self.indice_nota]
+        # ======================= CRIAR SETAS =======================
+
+        while (
+            self.indice_nota < len(self.notas)
+            and tempo >= self.notas[self.indice_nota][0]
+        ):
+
+            _, direcao = self.notas[
+                self.indice_nota
+            ]
+
             receptor = self.receptores[direcao]
 
             self.setas.append(
-                Seta(receptor.x, -100, direcao)
+                Seta(
+                    receptor.x,
+                    -100,
+                    direcao
+                )
             )
 
             self.indice_nota += 1
 
+        # ======================= ATUALIZAR SETAS =======================
+
         for seta in self.setas:
+
             seta.mover()
 
-            receptor = self.receptores[seta.direcao]
+            receptor = self.receptores[
+                seta.direcao
+            ]
+
+            # ================= PROFESSOR =================
 
             if seta.quem == "professor":
-                if not seta.hit and seta.y >= receptor.y:
+
+                if (
+                    not seta.hit
+                    and seta.y >= receptor.y
+                ):
+
                     seta.hit = True
 
-                    self.barra_vida.dano_jogador(5)
+                    # Seta do professor acertou:
+                    # jogador perde um pouco de vida.
+                    self.barra_vida.seta_professor()
+
+            # ================= JOGADOR =================
+
             else:
 
                 if not seta.hit:
-                    if seta.y > receptor.y + self.pontuacao.janela_ruim:
+
+                    if (
+                        seta.y
+                        > receptor.y
+                        + self.pontuacao.janela_ruim
+                    ):
+
                         seta.hit = True
 
-                        self.barra_vida.dano_jogador(10)
+                        # Seta perdida: dano principal do jogador.
+                        self.barra_vida.seta_perdida()
 
                         self.ultimo_julgamento = "errou"
-                        self.tempo_julgamento = pygame.time.get_ticks()
+
+                        self.tempo_julgamento = (
+                            pygame.time.get_ticks()
+                        )
 
             seta.acertou()
 
-        self.sinc.verificar_sinc(self.setas)
+        # ======================= SINCRONIZAÇÃO =======================
 
+        self.sinc.verificar_sinc(
+            self.setas
+        )
+
+        # Atualiza a transição visual da barra
         self.barra_vida.atualizar()
 
-        acabou_a_musica = self.indice_nota >= len(self.notas)
-        todas_setas_resolvidas = all(seta.hit for seta in self.setas)
+        # ======================= FIM DA MÚSICA =======================
 
-        if self.barra_vida.jogador_perdeu():
-            self._encerrar_fase(venceu=False)
+        acabou_a_musica = (
+            self.indice_nota >= len(self.notas)
+        )
 
-        elif acabou_a_musica and todas_setas_resolvidas:
-            self._encerrar_fase(venceu=True)
+        todas_setas_resolvidas = all(
+            seta.hit for seta in self.setas
+        )
 
-    #=======================ATUALIZAR CONTAGEM=====================
+        # ======================= DERROTA =======================
+
+        if self.barra_vida.vida_jogador <= 0:
+
+            self._encerrar_fase(
+                venceu=False
+            )
+
+        # ======================= VITÓRIA =======================
+
+        elif (
+            acabou_a_musica
+            and todas_setas_resolvidas
+        ):
+
+            self._encerrar_fase(
+                venceu=True
+            )
+
+    # =========================================================
+    # ATUALIZAR CONTAGEM
+    # =========================================================
+
     def _atualizar_contagem(self):
-        tempo_decorrido = pygame.time.get_ticks() - self.tempo_contagem_inicio
-        duracao_total = len(self.contagem_textos) * self.contagem_duracao_etapa
+
+        tempo_decorrido = (
+            pygame.time.get_ticks()
+            - self.tempo_contagem_inicio
+        )
+
+        duracao_total = (
+            len(self.contagem_textos)
+            * self.contagem_duracao_etapa
+        )
 
         if tempo_decorrido >= duracao_total:
+
             self.contagem_audio.stop()
-            pygame.mixer.music.load(self.fase_pendente["musica"])
+
+            pygame.mixer.music.load(
+                self.fase_pendente["musica"]
+            )
+
             pygame.mixer.music.play()
 
-            self.tempo_inicio = pygame.time.get_ticks()
+            self.tempo_inicio = (
+                pygame.time.get_ticks()
+            )
+
             self.fase_pendente = None
 
             self.estado = "jogo"
 
-    #=======================ENCERRAR FASE=====================
+    # =========================================================
+    # ENCERRAR FASE
+    # =========================================================
+
     def _encerrar_fase(self, venceu):
+
         if venceu:
-            self.fase.desbloquear_proxima(self.fase_selecionada)
+
+            self.fase.desbloquear_proxima(
+                self.fase_selecionada
+            )
 
         self.estado = "selecao"
 
         pygame.mixer.music.stop()
-        pygame.mixer.music.load(MUSICA_MENU)
+
+        pygame.mixer.music.load(
+            MUSICA_MENU
+        )
+
         pygame.mixer.music.play(-1)
 
-#=======================DESENHAR=====================
+    # =========================================================
+    # DESENHAR
+    # =========================================================
 
     def desenhar(self):
+
+        # ======================= INTRO =======================
+
         if self.estado == "intro":
-            self.intro.desenhar(self.tela)
+
+            self.intro.desenhar(
+                self.tela
+            )
+
             pygame.display.update()
 
             return
+
+        # ======================= MENU =======================
 
         if self.estado == "menu":
-            self.tela_inicial.desenhar(self.tela)
+
+            self.tela_inicial.desenhar(
+                self.tela
+            )
+
             pygame.display.update()
 
             return
-        
+
+        # ======================= SELEÇÃO =======================
+
         if self.estado == "selecao":
 
-            self.tela.fill((25,25,25))
+            self.tela.fill(
+                (25, 25, 25)
+            )
 
-            fonte = pygame.font.SysFont(None,60)
+            fonte = pygame.font.SysFont(
+                None,
+                60
+            )
 
-            titulo = fonte.render("ESCOLHA A FASE",True,(255,255,255))
-            self.tela.blit(titulo,(350,70))
+            titulo = fonte.render(
+                "ESCOLHA A FASE",
+                True,
+                (255, 255, 255)
+            )
+
+            self.tela.blit(
+                titulo,
+                (350, 70)
+            )
 
             y = 220
 
-            for i,fase in enumerate(self.fases):
+            for i, fase in enumerate(
+                self.fases
+            ):
 
                 texto = fase["nome"]
 
@@ -332,68 +631,147 @@ class Jogo:
                     texto += " (Bloqueada)"
 
                 if i == self.fase_selecionada:
-                    texto = "> " + texto
-                    cor = (0,255,0)
-                else:
-                    cor = (255,255,255)
 
-                render = fonte.render(texto,True,cor)
-                self.tela.blit(render, (350, y))
+                    texto = "> " + texto
+                    cor = (0, 255, 0)
+
+                else:
+
+                    cor = (255, 255, 255)
+
+                render = fonte.render(
+                    texto,
+                    True,
+                    cor
+                )
+
+                self.tela.blit(
+                    render,
+                    (350, y)
+                )
+
                 y += 70
 
             pygame.display.update()
+
             return
 
+        # ======================= CRÉDITOS =======================
+
         if self.estado == "creditos":
-            self.tela_inicial.desenhar_creditos(self.tela)
+
+            self.tela_inicial.desenhar_creditos(
+                self.tela
+            )
+
             pygame.display.update()
 
             return
 
-        if self.estado == "contagem":
-            self.tela.blit(self.fundo_jogo, (0, 0))
+        # ======================= CONTAGEM =======================
 
-            tempo_decorrido = pygame.time.get_ticks() - self.tempo_contagem_inicio
+        if self.estado == "contagem":
+
+            self.tela.blit(
+                self.fundo_jogo,
+                (0, 0)
+            )
+
+            tempo_decorrido = (
+                pygame.time.get_ticks()
+                - self.tempo_contagem_inicio
+            )
+
             indice = min(
-                tempo_decorrido // self.contagem_duracao_etapa,
+                tempo_decorrido
+                // self.contagem_duracao_etapa,
                 len(self.contagem_textos) - 1
             )
 
-            texto_contagem = self.contagem_textos[indice]
+            texto_contagem = (
+                self.contagem_textos[indice]
+            )
 
-            render = self.fonte_contagem.render(texto_contagem, True, (255, 255, 255))
-            rect = render.get_rect(center=(self.largura // 2, self.altura // 2))
+            render = self.fonte_contagem.render(
+                texto_contagem,
+                True,
+                (255, 255, 255)
+            )
 
-            self.tela.blit(render, rect)
+            rect = render.get_rect(
+                center=(
+                    self.largura // 2,
+                    self.altura // 2
+                )
+            )
+
+            self.tela.blit(
+                render,
+                rect
+            )
 
             pygame.display.update()
+
             return
 
-        self.tela.blit(self.fundo_jogo, (0, 0))
+        # ======================= JOGO =======================
 
-        self.barra_vida.desenhar(self.tela)
+        self.tela.blit(
+            self.fundo_jogo,
+            (0, 0)
+        )
 
-        self.seta_esquerda.desenhar(self.tela)
-        self.seta_baixo.desenhar(self.tela)
-        self.seta_cima.desenhar(self.tela)
-        self.seta_direita.desenhar(self.tela)
+        self.barra_vida.desenhar(
+            self.tela
+        )
+
+        self.seta_esquerda.desenhar(
+            self.tela
+        )
+
+        self.seta_baixo.desenhar(
+            self.tela
+        )
+
+        self.seta_cima.desenhar(
+            self.tela
+        )
+
+        self.seta_direita.desenhar(
+            self.tela
+        )
 
         for seta in self.setas:
-            seta.desenhar(self.tela)
 
-        if (pygame.time.get_ticks()- self.tempo_julgamento< self.duracao_exibicao):
-            self.pontuacao.desenhar(self.tela,self.ultimo_julgamento)
+            seta.desenhar(
+                self.tela
+            )
+
+        if (
+            pygame.time.get_ticks()
+            - self.tempo_julgamento
+            < self.duracao_exibicao
+        ):
+
+            self.pontuacao.desenhar(
+                self.tela,
+                self.ultimo_julgamento
+            )
 
         pygame.display.update()
 
-#=======================INICIAR=====================
+    # =========================================================
+    # INICIAR
+    # =========================================================
 
     def iniciar(self):
+
         while self.rodando:
+
             self.processa_eventos()
             self.atualizar()
             self.desenhar()
 
             self.clock.tick(60)
 
-    pygame.quit()
+        pygame.quit()

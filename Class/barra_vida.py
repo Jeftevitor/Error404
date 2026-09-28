@@ -1,86 +1,157 @@
+import math
 import pygame
 
+
 class BarraVida:
-    def __init__(self, x, y, largura, altura, vida_maxima=100):
+    # =====================================================
+    # BALANCEAMENTO (valores em % da barra cheia)
+    # Mexa só aqui para ajustar a dificuldade.
+    # =====================================================
+    VIDA_INICIAL = 50.0         # a barra começa na metade
+    PERDA_SETA_PERDIDA = 6.0    # jogador deixou a seta passar
+    DANO_SETA_PROFESSOR = 1.5   # seta do professor chegou no receptor
+    CURA_ACERTO = 2.0           # jogador acertou uma seta
+    PERDA_TOQUE_ERRADO = 2.0    # jogador apertou sem ter seta para acertar
+
+    # =====================================================
+    # ANIMAÇÃO
+    # =====================================================
+    SUAVIZACAO_DESCIDA = 14.0   # quanto maior, mais rápido a barra cai
+    SUAVIZACAO_SUBIDA = 8.0     # quanto maior, mais rápido a barra sobe
+    DURACAO_FLASH = 0.25        # segundos do brilho ao levar dano
+
+    def __init__(self, x, y, largura, altura):
         self.x = x
         self.y = y
         self.largura = largura
         self.altura = altura
-        self.vida_maxima = vida_maxima
+        self.raio = altura // 2  # bordas totalmente arredondadas
 
-        self.vida_jogador = vida_maxima
-        self.vida_professor = vida_maxima
+        # Vida real (o jogo lê e altera esses valores)
+        self.vida_maxima = 1000.0
+        self.vida_jogador = self.vida_maxima * self.VIDA_INICIAL / 100.0
 
-        self.valor_exibido = 50.0
+        # Valor só visual, em % (0 a 100)
+        self.valor_exibido = self.VIDA_INICIAL
 
-        self.velocidade = 0.08
+        self._alvo_anterior = self.VIDA_INICIAL
+        self._flash = 0.0
+        self._ultimo_tick = None
 
-        self.cor_fundo = (35, 35, 40)
-        self.cor_jogador = (90, 210, 130)      # verde (lado direito)
-        self.cor_professor = (160, 32, 240)     # vermelho (lado esquerdo)
-        self.cor_borda = (0, 0, 0)
-        self.espessura_borda = 3
+        self.cor_jogador = (90, 210, 130)
+        self.cor_professor = (160, 32, 240)
+        self.cor_borda = (255, 255, 255)
 
+        # Superfície reaproveitada e máscara com cantos arredondados
+        self._superficie = pygame.Surface((largura, altura), pygame.SRCALPHA)
+        self._mascara = pygame.Surface((largura, altura), pygame.SRCALPHA)
+        pygame.draw.rect(
+            self._mascara, (255, 255, 255, 255),
+            (0, 0, largura, altura), border_radius=self.raio
+        )
+
+    # -----------------------------------------------------
+    # Eventos do jogo
+    # -----------------------------------------------------
+    def _pct(self, porcentagem):
+        return self.vida_maxima * porcentagem / 100.0
+
+    def seta_perdida(self):
+        self.dano_jogador(self._pct(self.PERDA_SETA_PERDIDA))
+
+    def toque_errado(self):
+        self.dano_jogador(self._pct(self.PERDA_TOQUE_ERRADO))
+
+    def seta_professor(self):
+        self.dano_jogador(self._pct(self.DANO_SETA_PROFESSOR))
+
+    def acerto(self, multiplicador=1.0):
+        # multiplicador permite curar mais em acertos perfeitos, se quiser
+        self.curar(self._pct(self.CURA_ACERTO) * multiplicador)
+
+    def dano_jogador(self, dano):
+        self.vida_jogador -= dano
+        self.vida_jogador = max(0.0, min(self.vida_maxima, self.vida_jogador))
+
+    def curar(self, valor):
+        self.vida_jogador += valor
+        self.vida_jogador = max(0.0, min(self.vida_maxima, self.vida_jogador))
+
+    def dano_professor(self, dano):
+        # Mantido só por compatibilidade com versões antigas do jogo.
+        pass
 
     def reset(self):
-        self.vida_jogador = self.vida_maxima
-        self.vida_professor = self.vida_maxima
-        self.valor_exibido = 50.0
-
-    def dano_jogador(self, quantidade):
-        self.vida_jogador -= quantidade
-        if self.vida_jogador < 0:
-            self.vida_jogador = 0
-
-    def dano_professor(self, quantidade):
-        self.vida_professor -= quantidade
-        if self.vida_professor < 0:
-            self.vida_professor = 0
+        self.vida_jogador = self.vida_maxima * self.VIDA_INICIAL / 100.0
+        self.valor_exibido = self.VIDA_INICIAL
+        self._alvo_anterior = self.VIDA_INICIAL
+        self._flash = 0.0
+        self._ultimo_tick = None
 
     def jogador_perdeu(self):
         return self.vida_jogador <= 0
 
-    def professor_perdeu(self):
-        return self.vida_professor <= 0
-
-
+    # -----------------------------------------------------
+    # Animação
+    # -----------------------------------------------------
     def atualizar(self):
-        total = self.vida_jogador + self.vida_professor
-
-        if total <= 0:
-            valor_alvo = 50.0
+        # dt real em segundos, para a animação ficar igual em qualquer FPS
+        agora = pygame.time.get_ticks()
+        if self._ultimo_tick is None:
+            dt = 1.0 / 60.0
         else:
-            valor_alvo = (self.vida_jogador / total) * 100.0
+            dt = (agora - self._ultimo_tick) / 1000.0
+        self._ultimo_tick = agora
+        dt = max(0.0, min(dt, 0.05))  # evita saltos após pausas/contagem
 
+        alvo = (self.vida_jogador / self.vida_maxima) * 100.0
 
-        self.valor_exibido += (valor_alvo - self.valor_exibido) * self.velocidade
+        # Levou dano: acende o brilho
+        if alvo < self._alvo_anterior - 1e-6:
+            self._flash = 1.0
+        self._alvo_anterior = alvo
+
+        # Suavização exponencial (rápida e sem tranco)
+        taxa = (
+            self.SUAVIZACAO_DESCIDA
+            if alvo < self.valor_exibido
+            else self.SUAVIZACAO_SUBIDA
+        )
+        self.valor_exibido += (alvo - self.valor_exibido) * (1.0 - math.exp(-taxa * dt))
+        if abs(alvo - self.valor_exibido) < 0.02:
+            self.valor_exibido = alvo
+
+        self._flash = max(0.0, self._flash - dt / self.DURACAO_FLASH)
+
+    # -----------------------------------------------------
+    # Desenho
+    # -----------------------------------------------------
+    @staticmethod
+    def _misturar(cor_a, cor_b, t):
+        return tuple(int(a + (b - a) * t) for a, b in zip(cor_a, cor_b))
 
     def desenhar(self, tela):
+        p = max(0.0, min(1.0, self.valor_exibido / 100.0))
+        largura_jogador = int(round(self.largura * p))
 
-        pygame.draw.rect(
-            tela, self.cor_fundo,
-            (self.x, self.y, self.largura, self.altura),
-            border_radius=self.altura // 2
+        # Monta a barra numa superfície e recorta os cantos arredondados
+        self._superficie.fill(self.cor_professor)
+
+        if largura_jogador > 0:
+            cor = self._misturar(self.cor_jogador, (255, 255, 255), 0.6 * self._flash)
+            pygame.draw.rect(
+                self._superficie, cor,
+                (0, 0, largura_jogador, self.altura)
+            )
+
+        self._superficie.blit(
+            self._mascara, (0, 0),
+            special_flags=pygame.BLEND_RGBA_MULT
         )
-
-        corte = int(self.largura * (self.valor_exibido / 100))
-        corte = max(0, min(self.largura, corte))  
-
-        superficie = pygame.Surface((self.largura, self.altura), pygame.SRCALPHA)
-
-        pygame.draw.rect(superficie, self.cor_professor, (0, 0, corte, self.altura))
-
-        pygame.draw.rect(superficie, self.cor_jogador, (corte, 0, self.largura - corte, self.altura))
-
-        mascara = pygame.Surface((self.largura, self.altura), pygame.SRCALPHA)
-        pygame.draw.rect(mascara, (255, 255, 255, 255), (0, 0, self.largura, self.altura),
-                          border_radius=self.altura // 2)
-        superficie.blit(mascara, (0, 0), special_flags=pygame.BLEND_RGBA_MIN)
-
-        tela.blit(superficie, (self.x, self.y))
+        tela.blit(self._superficie, (self.x, self.y))
 
         pygame.draw.rect(
             tela, self.cor_borda,
             (self.x, self.y, self.largura, self.altura),
-            width=self.espessura_borda, border_radius=self.altura // 2
+            2, border_radius=self.raio
         )
