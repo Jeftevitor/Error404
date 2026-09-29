@@ -384,6 +384,23 @@ class Jogo:
     # =========================================================
 
     def atualizar(self):
+        # ======================= PASSE DE ADMIN =======================
+
+        teclas = pygame.key.get_pressed()
+
+        if (
+            self.estado == "selecao"
+            and teclas[pygame.K_a]
+            and teclas[pygame.K_b]
+        ):
+            if not self.admin_ativado:
+                for fase in self.fases:
+                    fase["desbloqueada"] = True
+
+                self.admin_ativado = True
+
+        else:
+            self.admin_ativado = False
 
         if self.estado == "contagem":
 
@@ -480,16 +497,6 @@ class Jogo:
         # Atualiza a transição visual da barra
         self.barra_vida.atualizar()
 
-        # ======================= FIM DA MÚSICA =======================
-
-        acabou_a_musica = (
-            self.indice_nota >= len(self.notas)
-        )
-
-        todas_setas_resolvidas = all(
-            seta.hit for seta in self.setas
-        )
-
         # ======================= DERROTA =======================
 
         if self.barra_vida.vida_jogador <= 0:
@@ -499,11 +506,10 @@ class Jogo:
             )
 
         # ======================= VITÓRIA =======================
+        # A fase só termina quando a música acabar + pausa de 1.5s
+        # (a pausa fica em Fase.pausa_final_ms)
 
-        elif (
-            acabou_a_musica
-            and todas_setas_resolvidas
-        ):
+        elif self.fase.fase_terminou():
 
             self._encerrar_fase(
                 venceu=True
@@ -529,11 +535,10 @@ class Jogo:
 
             self.contagem_audio.stop()
 
-            pygame.mixer.music.load(
-                self.fase_pendente["musica"]
+            # Toca a música da fase e reinicia o controle de fim de fase
+            self.fase.iniciar_musica(
+                self.fase_selecionada
             )
-
-            pygame.mixer.music.play()
 
             self.tempo_inicio = (
                 pygame.time.get_ticks()
