@@ -57,23 +57,19 @@ class Fase:
                     self.notas.append(
                         (int(tempo), direcao)
                     )
+        self.notas = sorted(set(self.notas))
 
         self.indice_nota = 0
 
         return self.notas
 
+#Carrega e toca a música da fase e reinicia o controle de fim.
     def iniciar_musica(self, indice):
-        """Carrega e toca a música da fase e reinicia o controle de fim."""
         pygame.mixer.music.load(self.fases[indice]["musica"])
         pygame.mixer.music.play()
         self.musica_terminou_em = None
 
     def fase_terminou(self):
-        """True somente depois que a música acabou + a pausa final.
-
-        Chame esta função a cada frame, mas só quando o jogo NÃO estiver
-        pausado (com a música pausada, get_busy() pode retornar False).
-        """
         if self.musica_terminou_em is None:
             if not pygame.mixer.music.get_busy():
                 self.musica_terminou_em = pygame.time.get_ticks()

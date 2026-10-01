@@ -4,11 +4,10 @@ import pygame
 class Seta:
     imagens_cache = {}
 
-    def __init__(self, x, y, direcao, quem="jogador"):
+    def __init__(self, x, y, direcao):
         self.x = x
         self.y = y
         self.direcao = direcao
-        self.quem = quem
         self.velocidade = 5
         self.hit = False
 

@@ -1,3 +1,4 @@
+import os
 import pygame
 from Class.seta import Seta
 from Class.pontuacao import Pontuacao
@@ -59,14 +60,8 @@ class Jogo:
 
         # ======================= FUNDO =======================
 
-        self.fundo_jogo = pygame.image.load(
-            "Assets/Telas/fundo_joaildo.png"
-        ).convert()
-
-        self.fundo_jogo = pygame.transform.scale(
-            self.fundo_jogo,
-            (self.largura, self.altura)
-        )
+        # Fundo padrão (fase 0); trocado ao iniciar cada fase
+        self.carregar_fundo(0)
 
         # ======================= BARRA DE VIDA =======================
 
@@ -192,7 +187,6 @@ class Jogo:
             if (
                 seta.direcao == direcao
                 and not seta.hit
-                and seta.quem == "jogador"
             ):
 
                 diferenca = abs(
@@ -312,6 +306,10 @@ class Jogo:
                                 fase["arquivo"]
                             )
 
+                            self.carregar_fundo(
+                                self.fase_selecionada
+                            )
+
                             pygame.mixer.music.stop()
 
                             self.contagem_audio.play()
@@ -378,6 +376,30 @@ class Jogo:
 
         self.indice_nota = 0
         self.setas = []
+
+    # =========================================================
+    # CARREGAR FUNDO DA FASE
+    # =========================================================
+
+    def carregar_fundo(self, indice):
+
+        nome = self.fase.fase_atual(indice)["nome"]
+
+        # "Max e Hugo" -> "max_e_hugo"
+        nome = nome.lower().replace(" ", "_")
+
+        caminho = f"Assets/Telas/fundo_{nome}.png"
+
+        # Se a imagem da fase não existir, usa o fundo da fase 1
+        if not os.path.exists(caminho):
+            caminho = "Assets/Telas/fundo_joaildo.png"
+
+        fundo = pygame.image.load(caminho).convert()
+
+        self.fundo_jogo = pygame.transform.scale(
+            fundo,
+            (self.largura, self.altura)
+        )
 
     # =========================================================
     # ATUALIZAR
@@ -448,43 +470,26 @@ class Jogo:
                 seta.direcao
             ]
 
-            # ================= PROFESSOR =================
+            # ================= SETA PERDIDA =================
 
-            if seta.quem == "professor":
+            if not seta.hit:
 
                 if (
-                    not seta.hit
-                    and seta.y >= receptor.y
+                    seta.y
+                    > receptor.y
+                    + self.pontuacao.janela_ruim
                 ):
 
                     seta.hit = True
 
-                    # Seta do professor acertou:
-                    # jogador perde um pouco de vida.
-                    self.barra_vida.seta_professor()
+                    # Seta perdida: dano principal do jogador.
+                    self.barra_vida.seta_perdida()
 
-            # ================= JOGADOR =================
+                    self.ultimo_julgamento = "errou"
 
-            else:
-
-                if not seta.hit:
-
-                    if (
-                        seta.y
-                        > receptor.y
-                        + self.pontuacao.janela_ruim
-                    ):
-
-                        seta.hit = True
-
-                        # Seta perdida: dano principal do jogador.
-                        self.barra_vida.seta_perdida()
-
-                        self.ultimo_julgamento = "errou"
-
-                        self.tempo_julgamento = (
-                            pygame.time.get_ticks()
-                        )
+                    self.tempo_julgamento = (
+                        pygame.time.get_ticks()
+                    )
 
             seta.acertou()
 

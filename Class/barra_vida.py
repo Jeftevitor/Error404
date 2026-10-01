@@ -4,21 +4,19 @@ import pygame
 
 class BarraVida:
     # =====================================================
-    # BALANCEAMENTO (valores em % da barra cheia)
-    # Mexa só aqui para ajustar a dificuldade.
+    # BALANCEAMENTO(%)
     # =====================================================
     VIDA_INICIAL = 50.0         # a barra começa na metade
-    PERDA_SETA_PERDIDA = 6.0    # jogador deixou a seta passar
-    DANO_SETA_PROFESSOR = 1.5   # seta do professor chegou no receptor
-    CURA_ACERTO = 2.0           # jogador acertou uma seta
-    PERDA_TOQUE_ERRADO = 2.0    # jogador apertou sem ter seta para acertar
+    PERDA_SETA_PERDIDA = 7.0    # jogador deixou a seta passar
+    CURA_ACERTO = 3.0           # jogador acertou uma seta
+    PERDA_TOQUE_ERRADO = 4.0    # jogador apertou sem ter seta para acertar
 
     # =====================================================
     # ANIMAÇÃO
     # =====================================================
-    SUAVIZACAO_DESCIDA = 14.0   # quanto maior, mais rápido a barra cai
-    SUAVIZACAO_SUBIDA = 8.0     # quanto maior, mais rápido a barra sobe
-    DURACAO_FLASH = 0.25        # segundos do brilho ao levar dano
+    SUAVIZACAO_DESCIDA = 15.0   
+    SUAVIZACAO_SUBIDA = 9.0     
+    DURACAO_FLASH = 0.25        
 
     def __init__(self, x, y, largura, altura):
         self.x = x
@@ -62,11 +60,7 @@ class BarraVida:
     def toque_errado(self):
         self.dano_jogador(self._pct(self.PERDA_TOQUE_ERRADO))
 
-    def seta_professor(self):
-        self.dano_jogador(self._pct(self.DANO_SETA_PROFESSOR))
-
     def acerto(self, multiplicador=1.0):
-        # multiplicador permite curar mais em acertos perfeitos, se quiser
         self.curar(self._pct(self.CURA_ACERTO) * multiplicador)
 
     def dano_jogador(self, dano):
@@ -78,7 +72,6 @@ class BarraVida:
         self.vida_jogador = max(0.0, min(self.vida_maxima, self.vida_jogador))
 
     def dano_professor(self, dano):
-        # Mantido só por compatibilidade com versões antigas do jogo.
         pass
 
     def reset(self):
@@ -95,7 +88,6 @@ class BarraVida:
     # Animação
     # -----------------------------------------------------
     def atualizar(self):
-        # dt real em segundos, para a animação ficar igual em qualquer FPS
         agora = pygame.time.get_ticks()
         if self._ultimo_tick is None:
             dt = 1.0 / 60.0
@@ -106,12 +98,10 @@ class BarraVida:
 
         alvo = (self.vida_jogador / self.vida_maxima) * 100.0
 
-        # Levou dano: acende o brilho
         if alvo < self._alvo_anterior - 1e-6:
             self._flash = 1.0
         self._alvo_anterior = alvo
 
-        # Suavização exponencial (rápida e sem tranco)
         taxa = (
             self.SUAVIZACAO_DESCIDA
             if alvo < self.valor_exibido
@@ -133,8 +123,6 @@ class BarraVida:
     def desenhar(self, tela):
         p = max(0.0, min(1.0, self.valor_exibido / 100.0))
         largura_jogador = int(round(self.largura * p))
-
-        # Monta a barra numa superfície e recorta os cantos arredondados
         self._superficie.fill(self.cor_professor)
 
         if largura_jogador > 0:
