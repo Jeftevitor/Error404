@@ -8,18 +8,21 @@ class Fase:
                 "nome": "Joaildo",
                 "arquivo": "Assets/Arquivos_txt/fase1.txt",
                 "musica": "Assets/Music/JOJO(Freak-Ariana grande).ogg",
+                "professores": ["joaildo"],
                 "desbloqueada": True
             },
             {
                 "nome": "Max e Hugo",
                 "arquivo": "Assets/Arquivos_txt/fase2.txt",
                 "musica": "Assets/Music/MAX_HUGO(Passeios noturnos- Jão).ogg",
+                "professores": ["hugo", "max"],
                 "desbloqueada": False
             },
             {
                 "nome": "Romerito",
                 "arquivo": "Assets/Arquivos_txt/fase3.txt",
                 "musica": "Assets/Music/ROMERITO(Nuevayol- Bad bunny).ogg",
+                "professores": ["romerito"],
                 "desbloqueada": False
             }
         ]
