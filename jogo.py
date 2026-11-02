@@ -9,6 +9,7 @@ from Class.fase import Fase
 from Class.sinc import Sinc
 from Class.ranking import Ranking
 from Class.tela_fim import TelaFim
+from Class.tele_selecao import Telaselecao
 
 
 MUSICA_MENU = 'Assets/Music/MENU(Desmitificar- Marina sena).ogg'
@@ -60,6 +61,12 @@ class Jogo:
 
         self.fase = Fase()
         self.fases = self.fase.fases
+        
+        self.tela_selecao = Telaselecao(
+        self.largura,
+        self.altura,
+        self.fases
+    )
 
         self.tela = pygame.display.set_mode(
             (self.largura, self.altura)
@@ -327,60 +334,43 @@ class Jogo:
 
                 if evento.type == pygame.KEYDOWN:
 
-                    if evento.key == pygame.K_UP:
+                    if evento.key == pygame.K_LEFT:
 
-                        if self.fase_selecionada > 0:
-                            self.fase_selecionada -= 1
+                        self.fase_selecionada = (
+                            self.fase_selecionada - 1
+                        ) % len(self.fases)
 
-                    elif evento.key == pygame.K_DOWN:
+                    elif evento.key == pygame.K_RIGHT:
 
-                        if (
-                            self.fase_selecionada
-                            < len(self.fases) - 1
-                        ):
-                            self.fase_selecionada += 1
+                        self.fase_selecionada = (
+                            self.fase_selecionada + 1
+                        ) % len(self.fases)
 
                     elif evento.key == pygame.K_RETURN:
 
-                        fase = self.fases[
-                            self.fase_selecionada
-                        ]
+                        fase = self.fases[self.fase_selecionada]
 
                         if fase["desbloqueada"]:
 
                             self.barra_vida.reset()
-
                             self.pontuacao.resetar()
                             self.ultimo_julgamento = ""
 
-                            self.carregar_fase(
-                                fase["arquivo"]
-                            )
-
-                            self.carregar_fundo(
-                                self.fase_selecionada
-                            )
-
-                            self.carregar_sprites(
-                                self.fase_selecionada
-                            )
+                            self.carregar_fase(fase["arquivo"])
+                            self.carregar_fundo(self.fase_selecionada)
+                            self.carregar_sprites(self.fase_selecionada)
 
                             pygame.mixer.music.stop()
-
                             self.contagem_audio.play()
 
                             self.fase_pendente = fase
-
-                            self.tempo_contagem_inicio = (
-                                pygame.time.get_ticks()
-                            )
+                            self.tempo_contagem_inicio = pygame.time.get_ticks()
 
                             self.estado = "contagem"
 
                     elif evento.key == pygame.K_ESCAPE:
 
                         self.estado = "menu"
-
             # ======================= CRÉDITOS =======================
 
             elif self.estado == "creditos":
@@ -940,58 +930,10 @@ class Jogo:
 
         if self.estado == "selecao":
 
-            self.tela.fill(
-                (25, 25, 25)
+            self.tela_selecao.desenhar(
+                self.tela,
+                self.fase_selecionada
             )
-
-            fonte = pygame.font.SysFont(
-                None,
-                60
-            )
-
-            titulo = fonte.render(
-                "ESCOLHA A FASE",
-                True,
-                (255, 255, 255)
-            )
-
-            self.tela.blit(
-                titulo,
-                (350, 70)
-            )
-
-            y = 220
-
-            for i, fase in enumerate(
-                self.fases
-            ):
-
-                texto = fase["nome"]
-
-                if not fase["desbloqueada"]:
-                    texto += " (Bloqueada)"
-
-                if i == self.fase_selecionada:
-
-                    texto = "> " + texto
-                    cor = (0, 255, 0)
-
-                else:
-
-                    cor = (255, 255, 255)
-
-                render = fonte.render(
-                    texto,
-                    True,
-                    cor
-                )
-
-                self.tela.blit(
-                    render,
-                    (350, y)
-                )
-
-                y += 70
 
             pygame.display.update()
 
