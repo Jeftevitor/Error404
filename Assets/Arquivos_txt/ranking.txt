@@ -1,1 +1,6 @@
 Jefte;Max e Hugo;58800;Perfeito
+Isabela;Joaildo;14700;Perfeito
+Isabela;Joaildo;14600;Perfeito
+Isabela;Max e Hugo;18000;Perfeito
+Isabela;Romerito;45900;Perfeito
+Belinha;Joaildo;17400;Perfeito
