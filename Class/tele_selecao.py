@@ -1,4 +1,3 @@
-
 import os
 import pygame
 
@@ -15,6 +14,7 @@ class Telaselecao:
         self.fonte_nome = pygame.font.Font(None, 43)
         self.fonte_info = pygame.font.Font(None, 34)
         self.fonte_seta = pygame.font.Font(None, 100)
+        self.fonte_voltar = pygame.font.Font(None, 28)
 
         self.amarelo = (255, 180, 40)
         self.branco = (255, 255, 255)
@@ -25,11 +25,25 @@ class Telaselecao:
         self.imagens = {}
         self.imagens_cinza = {}
 
-        self.carregar_imagens()
+        # As imagens só são carregadas na primeira vez que a tela é
+        # desenhada, porque convert_alpha() precisa que o pygame.display
+        # já tenha sido criado (set_mode).
+        self.imagens_carregadas = False
 
     # =========================================
     # CARREGAR IMAGENS
     # =========================================
+
+    def _criar_versao_cinza(self, imagem):
+
+        if hasattr(pygame.transform, "grayscale"):
+            return pygame.transform.grayscale(imagem)
+
+        # Fallback para versões antigas do pygame: escurece a imagem
+        cinza = imagem.copy()
+        cinza.fill((110, 110, 110), special_flags=pygame.BLEND_RGB_MULT)
+
+        return cinza
 
     def carregar_imagens(self):
 
@@ -57,14 +71,12 @@ class Telaselecao:
                 ).convert_alpha()
 
                 self.imagens[nome] = imagem
-
-                self.imagens_cinza[nome] = (
-                    pygame.transform.grayscale(imagem)
-                )
+                self.imagens_cinza[nome] = self._criar_versao_cinza(imagem)
 
             except pygame.error as erro:
-
                 print(f"Erro ao carregar {caminho}: {erro}")
+
+        self.imagens_carregadas = True
 
     # =========================================
     # DESENHAR PROFESSORES
@@ -83,23 +95,21 @@ class Telaselecao:
         if not professores:
             return
 
-        topo = area.top + 90
-        base = area.bottom - 15
+        topo = area.top + 75
+        base = area.bottom - 30
 
         altura_disponivel = base - topo
         quantidade = len(professores)
 
-        largura_individual = (
-            area.width - 30
-        ) / quantidade
+        largura_individual = (area.width - 30) / quantidade
+
+        imagens = (
+            self.imagens
+            if desbloqueada
+            else self.imagens_cinza
+        )
 
         for i, professor in enumerate(professores):
-
-            imagens = (
-                self.imagens
-                if desbloqueada
-                else self.imagens_cinza
-            )
 
             imagem = imagens.get(professor)
 
@@ -113,15 +123,8 @@ class Telaselecao:
                 altura_disponivel / imagem.get_height()
             )
 
-            nova_largura = max(
-                1,
-                int(imagem.get_width() * proporcao)
-            )
-
-            nova_altura = max(
-                1,
-                int(imagem.get_height() * proporcao)
-            )
+            nova_largura = max(1, int(imagem.get_width() * proporcao))
+            nova_altura = max(1, int(imagem.get_height() * proporcao))
 
             imagem = pygame.transform.smoothscale(
                 imagem,
@@ -135,17 +138,12 @@ class Telaselecao:
                 + largura_individual / 2
             )
 
-            centro_y = (
-                topo + altura_disponivel / 2
-            )
+            centro_y = topo + altura_disponivel / 2
 
             tela.blit(
                 imagem,
                 imagem.get_rect(
-                    center=(
-                        int(centro_x),
-                        int(centro_y)
-                    )
+                    center=(int(centro_x), int(centro_y))
                 )
             )
 
@@ -166,13 +164,7 @@ class Telaselecao:
 
         desbloqueada = fase.get("desbloqueada", False)
 
-        area = pygame.Rect(
-            0,
-            0,
-            largura,
-            altura
-        )
-
+        area = pygame.Rect(0, 0, largura, altura)
         area.center = (centro_x, centro_y)
 
         pygame.draw.rect(
@@ -228,6 +220,9 @@ class Telaselecao:
 
     def desenhar(self, tela, indice_selecionado):
 
+        if not self.imagens_carregadas:
+            self.carregar_imagens()
+
         tela.fill(self.preto)
 
         total = len(self.fases)
@@ -240,6 +235,8 @@ class Telaselecao:
         centro_x = self.largura // 2
         centro_y = 425
 
+        # TÍTULO
+
         titulo = self.fonte_titulo.render(
             "SELECAO DE FASE",
             True,
@@ -248,9 +245,7 @@ class Telaselecao:
 
         tela.blit(
             titulo,
-            titulo.get_rect(
-                center=(centro_x, 90)
-            )
+            titulo.get_rect(center=(centro_x, 90))
         )
 
         # CARTÃO ESQUERDO
@@ -299,53 +294,44 @@ class Telaselecao:
 
         # SETAS
 
-        esquerda = self.fonte_seta.render(
-            "<",
-            True,
-            self.amarelo
-        )
-
-        direita = self.fonte_seta.render(
-            ">",
-            True,
-            self.amarelo
-        )
+        esquerda = self.fonte_seta.render("<", True, self.amarelo)
+        direita = self.fonte_seta.render(">", True, self.amarelo)
 
         tela.blit(
             esquerda,
-            esquerda.get_rect(
-                center=(centro_x - 340, centro_y)
-            )
+            esquerda.get_rect(center=(centro_x - 340, centro_y))
         )
 
         tela.blit(
             direita,
-            direita.get_rect(
-                center=(centro_x + 340, centro_y)
-            )
+            direita.get_rect(center=(centro_x + 340, centro_y))
         )
 
         # TEXTO ENTER
 
         if fase_atual.get("desbloqueada", False):
-
             texto = "ENTER - JOGAR"
             cor = self.amarelo
-
         else:
-
             texto = "FASE BLOQUEADA"
             cor = self.cinza
 
-        info = self.fonte_info.render(
-            texto,
-            True,
-            cor
-        )
+        info = self.fonte_info.render(texto, True, cor)
 
         tela.blit(
             info,
-            info.get_rect(
-                center=(centro_x, 680)
-            )
+            info.get_rect(center=(centro_x, 668))
+        )
+
+        # TEXTO VOLTAR
+
+        texto_voltar = self.fonte_voltar.render(
+            "APERTE ESC PARA VOLTAR",
+            True,
+            self.branco
+        )
+
+        tela.blit(
+            texto_voltar,
+            texto_voltar.get_rect(center=(centro_x, 703))
         )
