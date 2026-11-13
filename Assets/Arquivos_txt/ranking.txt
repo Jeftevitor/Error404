@@ -1,3 +1,3 @@
-Jefte;Max e Hugo;58800;Perfeito
-Mariluz;Joaildo;48300;Perfeito
-Mariluz;Max e Hugo;51000;Ótimo
+Jefte;Joaildo;42400;Perfeito
+Isabela;Joaildo;42600;Perfeito
+Jefte;Joaildo;43100;Perfeito

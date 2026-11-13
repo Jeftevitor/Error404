@@ -30,7 +30,7 @@ class Fase:
         self.indice_nota = 0
 
         # Controle de fim de fase pela música
-        self.pausa_final_ms = 1500      # pausa depois que a música acaba
+        self.pausa_final_ms = 20     # pausa depois que a música acaba
         self.musica_terminou_em = None  # momento (ms) em que a música acabou
 
     def fase_atual(self, indice):
