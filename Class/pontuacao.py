@@ -6,9 +6,9 @@ class Pontuacao:
         self.combo = 0
         self.max_combo = 0
 
-        self.pontos_perfeitos = 350
+        self.pontos_perfeitos = 100
         self.pontos_bons = 200
-        self.pontos_ruins = 50
+        self.pontos_ruins = 300
         self.pontos_perdidos = 0
 
         self.janela_perfeita = 50

@@ -3,4 +3,8 @@ Isabela;Joaildo;14700;Perfeito
 Isabela;Joaildo;14600;Perfeito
 Isabela;Max e Hugo;18000;Perfeito
 Isabela;Romerito;45900;Perfeito
+<<<<<<< HEAD
 Belinha;Joaildo;17400;Perfeito
+=======
+Belinha;Joaildo;17400;Perfeito
+>>>>>>> 19334f64b6d3e69d94840d55b7f68d26f8f71410
