@@ -5,8 +5,8 @@ from Class.ranking import formatar_pontos
 LIMITES_CLASSIFICACAO = (
     (0.90, "Perfeito"),
     (0.75, "Ótimo"),
-    (0.55, "Bom"),
-    (0.35, "Regular"),
+    (0.50, "Bom"),
+    (0.30, "Regular"),
     (0.00, "Ruim"),
 )
 

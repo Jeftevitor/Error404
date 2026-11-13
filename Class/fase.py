@@ -1,6 +1,5 @@
 import pygame
 
-
 class Fase:
     def __init__(self):
         self.fases = [
