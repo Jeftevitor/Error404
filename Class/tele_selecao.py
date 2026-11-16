@@ -349,3 +349,16 @@ class Telaselecao:
                 center=(centro_x, 680)
             )
         )
+
+        texto_voltar = self.fonte_info.render(
+            "APERTE ESC PARA VOLTAR",
+            True,
+            self.branco
+        )
+
+        tela.blit(
+            texto_voltar,
+            texto_voltar.get_rect(
+                center=(centro_x, 650)
+            )
+        )

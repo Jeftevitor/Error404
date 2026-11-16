@@ -4,3 +4,22 @@ Isabela;Joaildo;14600;Perfeito
 Isabela;Max e Hugo;18000;Perfeito
 Isabela;Romerito;45900;Perfeito
 Belinha;Joaildo;17400;Perfeito
+Isabela;Joaildo;14900;Perfeito
+Isabela;Joaildo;16200;Perfeito
+Isabela;Max e Hugo;21900;Perfeito
+Isabela;Romerito;49000;Perfeito
+sofia;Joaildo;15200;Perfeito
+sofia;Max e Hugo;17700;Perfeito
+sofia;Romerito;36100;Perfeito
+sofia;Romerito;38700;Perfeito
+sofia;Romerito;41400;Perfeito
+sofia;Romerito;38300;Perfeito
+Júlia;Joaildo;16200;Perfeito
+Júlia;Max e Hugo;17300;Perfeito
+Jefte;Romerito;37400;Perfeito
+Isabela;Romerito;45700;Perfeito
+Jefte;Romerito;36900;Perfeito
+Isabela;Romerito;52800;Perfeito
+soso;Romerito;40500;Perfeito
+Jefte;Romerito;37100;Perfeito
+Jefte;Romerito;56100;Perfeito
