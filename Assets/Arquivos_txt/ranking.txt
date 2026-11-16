@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 Jefte;Max e Hugo;58800;Perfeito
 Isabela;Joaildo;14700;Perfeito
 Isabela;Joaildo;14600;Perfeito
@@ -23,3 +24,25 @@ Isabela;Romerito;52800;Perfeito
 soso;Romerito;40500;Perfeito
 Jefte;Romerito;37100;Perfeito
 Jefte;Romerito;56100;Perfeito
+=======
+Jefte;Joaildo;42400;Perfeito
+Isabela;Joaildo;42600;Perfeito
+Jefte;Joaildo;43100;Perfeito
+Isabela;Joaildo;40900;Perfeito
+/;Max e Hugo;44400;Ótimo
+/;Romerito;91100;Ótimo
+a;Romerito;68150;Ótimo
+s;Romerito;64650;Bom
+s;Romerito;67300;Ótimo
+l;Joaildo;32000;Ótimo
+ç;Joaildo;27200;Ótimo
+a;Joaildo;30900;Ótimo
+f;Joaildo;28300;Ótimo
+ç;Joaildo;24900;Bom
+r;Joaildo;29300;Ótimo
+Isabela;Joaildo;30700;Ótimo
+Isabela;Romerito;58900;Bom
+l;Joaildo;32300;Ótimo
+~;Joaildo;28750;Ótimo
+a;Joaildo;29100;Ótimo
+>>>>>>> 122b8c87ef899708b49604cbe9faa4368b43a541

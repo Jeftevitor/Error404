@@ -46,7 +46,18 @@ class Ranking:
         if pasta:
             os.makedirs(pasta, exist_ok=True)
 
+        precisa_quebra = False
+
+        if os.path.exists(self.arquivo) and os.path.getsize(self.arquivo) > 0:
+            with open(self.arquivo, "rb") as arquivo:
+                arquivo.seek(-1, os.SEEK_END)
+                precisa_quebra = arquivo.read(1) != b"\n"
+
         with open(self.arquivo, "a", encoding="utf-8") as arquivo:
+
+            if precisa_quebra:
+                arquivo.write("\n")
+
             arquivo.write(
                 f"{nome};{fase};{pontos};{classificacao}\n"
             )
