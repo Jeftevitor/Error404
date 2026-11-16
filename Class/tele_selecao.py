@@ -323,9 +323,7 @@ class Telaselecao:
             info.get_rect(center=(centro_x, 668))
         )
 
-        # TEXTO VOLTAR
-
-        texto_voltar = self.fonte_voltar.render(
+        texto_voltar = self.fonte_info.render(
             "APERTE ESC PARA VOLTAR",
             True,
             self.branco
@@ -333,5 +331,7 @@ class Telaselecao:
 
         tela.blit(
             texto_voltar,
-            texto_voltar.get_rect(center=(centro_x, 703))
+            texto_voltar.get_rect(
+                center=(centro_x, 650)
+            )
         )
