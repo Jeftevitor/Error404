@@ -25,12 +25,13 @@ ESTADOS_PERSONAGEM = (
     'direita', 'esquerda', 'parado'
 )
 
-TAM_FRENTE = (210, 280)
-TAM_FUNDO = (168, 224)
+TAM_FRENTE = (260, 360)
+TAM_FUNDO = (240, 330)
 MARGEM_LATERAL = 15
-BASE_FRENTE = 700    # y do "chão" do personagem da frente
-BASE_FUNDO = 640     # y do "chão" do personagem de trás (mais alto = mais longe)
+BASE_FRENTE = 635    # mantém os personagens acima da barra de vida
+BASE_FUNDO = 620     # personagem de trás fica um pouco mais alto
 RECUO_FUNDO = 45     # deslocamento lateral do personagem de trás
+RECUO_FUNDO_FASE2 = 125
 
 DURACAO_ESTADO_MS = 455
 
@@ -112,8 +113,8 @@ class Jogo:
 
         # ======================= BARRA DE VIDA =======================
 
-        largura_barra = 750
-        altura_barra = 45
+        largura_barra = 700
+        altura_barra = 35
 
         x_barra = (
             self.largura - largura_barra
@@ -133,7 +134,7 @@ class Jogo:
         # ======================= SETAS =======================
 
         largura_seta = 150
-        espaco_entre_setas = 160
+        espaco_entre_setas = 125
         centro_x = self.largura // 2
         y_setas = y_barra - 160
 
@@ -518,6 +519,7 @@ class Jogo:
 
         # Professores (direita): o último da lista fica na frente
         x_frente = self.largura - MARGEM_LATERAL - TAM_FRENTE[0]
+        recuo_fundo = RECUO_FUNDO_FASE2 if indice == 1 else RECUO_FUNDO
 
         self.professores = []
 
@@ -526,20 +528,30 @@ class Jogo:
             recuo = len(professores) - 1 - i
 
             if recuo == 0:
+                x_personagem = (
+                    x_frente - recuo_fundo
+                    if indice == 1
+                    else x_frente
+                )
 
                 professor = self._criar_personagem(
                     nome,
                     TAM_FRENTE,
-                    x_frente,
+                    x_personagem,
                     BASE_FRENTE
                 )
 
             else:
+                x_personagem = (
+                    x_frente
+                    if indice == 1
+                    else x_frente - RECUO_FUNDO * recuo
+                )
 
                 professor = self._criar_personagem(
                     nome,
                     TAM_FUNDO,
-                    x_frente - RECUO_FUNDO * recuo,
+                    x_personagem,
                     BASE_FUNDO
                 )
 
@@ -702,7 +714,10 @@ class Jogo:
             )
 
         # ======================= VITÓRIA =======================
-        elif self.fase.fase_terminou():
+        elif self.fase.fase_terminou(
+            self.fase_selecionada,
+            self.indice_nota >= len(self.notas) and not self.setas
+        ):
 
             self._finalizar_fase(
                 venceu=True

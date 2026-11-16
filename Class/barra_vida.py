@@ -38,7 +38,7 @@ class BarraVida:
 
         self.cor_jogador = (90, 210, 130)
         self.cor_professor = (160, 32, 240)
-        self.cor_borda = (255, 255, 255)
+        self.cor_borda = (0, 0, 0)
 
         # Superfície reaproveitada e máscara com cantos arredondados
         self._superficie = pygame.Surface((largura, altura), pygame.SRCALPHA)
