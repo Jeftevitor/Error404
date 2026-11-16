@@ -8,6 +8,7 @@ class Fase:
                 "arquivo": "Assets/Arquivos_txt/fase1.txt",
                 "musica": "Assets/Music/JOJO(Freak-Ariana grande).ogg",
                 "professores": ["joaildo"],
+                "pausa_final_ms": 550,
                 "desbloqueada": True
             },
             {
@@ -15,6 +16,7 @@ class Fase:
                 "arquivo": "Assets/Arquivos_txt/fase2.txt",
                 "musica": "Assets/Music/MAX_HUGO(Passeios noturnos- Jão).ogg",
                 "professores": ["hugo", "max"],
+                "pausa_final_ms": 600,
                 "desbloqueada": False
             },
             {
@@ -22,6 +24,7 @@ class Fase:
                 "arquivo": "Assets/Arquivos_txt/fase3.txt",
                 "musica": "Assets/Music/ROMERITO(Nuevayol- Bad bunny).ogg",
                 "professores": ["romerito"],
+                "pausa_final_ms": 750,
                 "desbloqueada": False
             }
         ]
@@ -29,9 +32,8 @@ class Fase:
         self.notas = []
         self.indice_nota = 0
 
-        # Controle de fim de fase pela música
-        self.pausa_final_ms = 20     # pausa depois que a música acaba
-        self.musica_terminou_em = None  # momento (ms) em que a música acabou
+        # Momento em que as setas terminaram e a música foi encerrada
+        self.musica_terminou_em = None
 
     def fase_atual(self, indice):
         return self.fases[indice]
@@ -71,13 +73,16 @@ class Fase:
         pygame.mixer.music.play()
         self.musica_terminou_em = None
 
-    def fase_terminou(self):
+    def fase_terminou(self, indice, notas_concluidas):
+        if not notas_concluidas:
+            return False
+
         if self.musica_terminou_em is None:
-            if not pygame.mixer.music.get_busy():
-                self.musica_terminou_em = pygame.time.get_ticks()
+            pygame.mixer.music.stop()
+            self.musica_terminou_em = pygame.time.get_ticks()
             return False
 
         return (
             pygame.time.get_ticks() - self.musica_terminou_em
-            >= self.pausa_final_ms
+            >= self.fases[indice]["pausa_final_ms"]
         )
