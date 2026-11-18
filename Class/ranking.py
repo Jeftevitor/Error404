@@ -4,12 +4,12 @@ import pygame
 ARQUIVO_RANKING = "Assets/Arquivos_txt/ranking.txt"
 LINHAS_POR_FASE = 10
 
-OURO = (255, 215, 0)
+OURO = (0, 0, 0)
 PRATA = (205, 205, 215)
 BRONZE = (205, 127, 50)
 BRANCO = (255, 255, 255)
-CINZA = (140, 140, 140)
-VERDE = (0, 255, 0)
+CINZA = (0, 0, 0)
+VERDE = (0, 190, 0)
 
 
 def formatar_pontos(pontos):
@@ -26,11 +26,23 @@ class Ranking:
         self.registros = []
         self.aba = 0
 
-        self.fonte_titulo = pygame.font.Font(None, 90)
-        self.fonte_aba = pygame.font.Font(None, 44)
-        self.fonte_cabecalho = pygame.font.Font(None, 32)
-        self.fonte_linha = pygame.font.Font(None, 40)
-        self.fonte_rodape = pygame.font.Font(None, 30)
+        caminho_fonte = "Assets/Fontes/PressStart2P-Regular.ttf"
+        if not os.path.exists(caminho_fonte):
+            caminho_fonte = None
+
+        self.fonte_titulo = pygame.font.Font(caminho_fonte, 28)
+        self.fonte_aba = pygame.font.Font(caminho_fonte, 22)
+        self.fonte_cabecalho = pygame.font.Font(caminho_fonte, 18)
+        self.fonte_linha = pygame.font.Font(caminho_fonte, 22)
+        self.fonte_rodape = pygame.font.Font(caminho_fonte, 16)
+
+        caminho_painel = "Assets/Telas/papel_ranking.png"
+        if os.path.exists(caminho_painel):
+            self.imagem_painel = pygame.image.load(
+                caminho_painel
+            ).convert_alpha()
+        else:
+            self.imagem_painel = None
 
     # =========================================================
     # ARQUIVO
@@ -149,13 +161,35 @@ class Ranking:
 
         tela.fill((25, 25, 25))
 
+        # ======================= IMAGEM DO PAINEL =======================
+
+        largura_painel = 1300
+        x0 = (self.largura - largura_painel) // 2
+
+        painel = pygame.Rect(x0, 0, largura_painel, 720)
+
+        if self.imagem_painel is not None:
+            imagem_painel = pygame.transform.smoothscale(
+                self.imagem_painel,
+                painel.size
+            )
+            tela.blit(imagem_painel, painel)
+        else:
+            pygame.draw.rect(
+                tela, (40, 40, 40), painel, border_radius=14
+            )
+
         # ======================= TÍTULO =======================
 
         titulo = self.fonte_titulo.render("RANKING", True, BRANCO)
-
         tela.blit(
             titulo,
-            titulo.get_rect(center=(self.largura // 2, 55))
+            titulo.get_rect(
+                center=(
+                    self.largura // 2,
+                    75
+                )
+            )
         )
 
         # ======================= ABAS (FASES) =======================
@@ -187,21 +221,13 @@ class Ranking:
                     3
                 )
 
-        # ======================= PAINEL =======================
+        largura_texto = 900
+        x_texto = (self.largura - largura_texto) // 2
 
-        largura_painel = 900
-        x0 = (self.largura - largura_painel) // 2
-
-        painel = pygame.Rect(x0, 160, largura_painel, 490)
-
-        pygame.draw.rect(
-            tela, (40, 40, 40), painel, border_radius=14
-        )
-
-        col_pos = x0 + 40
-        col_nome = x0 + 120
-        col_pontos_direita = x0 + 600
-        col_nota = x0 + 650
+        col_pos = x_texto + 40
+        col_nome = x_texto + 120
+        col_pontos_direita = x_texto + 600
+        col_nota = x_texto + 650
 
         # Cabeçalho
         for texto, x, alinhamento in (
@@ -224,8 +250,8 @@ class Ranking:
         pygame.draw.line(
             tela,
             (90, 90, 90),
-            (x0 + 25, 212),
-            (x0 + largura_painel - 25, 212),
+            (x_texto + 25, 212),
+            (x_texto + largura_texto - 25, 212),
             2
         )
 
@@ -249,7 +275,7 @@ class Ranking:
 
         cores_posicao = (OURO, PRATA, BRONZE)
 
-        y = 228
+        y = 246
 
         for i, registro in enumerate(linhas):
 
@@ -262,8 +288,8 @@ class Ranking:
             ):
                 pygame.draw.rect(
                     tela,
-                    (45, 85, 45),
-                    (x0 + 15, y - 4, largura_painel - 30, 38),
+                    VERDE,
+                    (x_texto + 15, y - 4, largura_texto - 30, 38),
                     border_radius=8
                 )
 
@@ -277,7 +303,12 @@ class Ranking:
             )
 
             tela.blit(pos, (col_pos, y))
-            tela.blit(nome, (col_nome, y))
+            tela.blit(
+                nome,
+                nome.get_rect(
+                    center=(x_texto + 360, y + nome.get_height() // 2)
+                )
+            )
             tela.blit(
                 pontos,
                 pontos.get_rect(topright=(col_pontos_direita, y))
@@ -291,7 +322,7 @@ class Ranking:
         rodape = self.fonte_rodape.render(
             "<  >  trocar fase        ENTER  voltar",
             True,
-            CINZA
+            BRANCO
         )
 
         tela.blit(

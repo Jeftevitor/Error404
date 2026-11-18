@@ -1,4 +1,5 @@
 import pygame
+import os
 
 class Pontuacao:
     def __init__(self):
@@ -15,7 +16,24 @@ class Pontuacao:
         self.janela_boa = 100
         self.janela_ruim = 150
 
-        self.fonte = pygame.font.Font(None, 60)
+        imagens = {
+            "perfeito": "Assets/Telas/p_perfeito.png",
+            "bom": "Assets/Telas/p_bom.png",
+            "ruim": "Assets/Telas/p_é.png",
+            "errou": "Assets/Telas/p_errou.png",
+        }
+
+        self.imagens = {}
+        for julgamento, caminho in imagens.items():
+            if os.path.exists(caminho):
+                imagem = pygame.image.load(caminho).convert_alpha()
+                tamanho = (220, 147) if julgamento == "bom" else (240, 160)
+                self.imagens[julgamento] = pygame.transform.smoothscale(
+                    imagem,
+                    tamanho
+                )
+            else:
+                self.imagens[julgamento] = None
 
     def calcular_pontos(self, tempo_reacao):
         tempo_reacao = abs(tempo_reacao)
@@ -56,16 +74,9 @@ class Pontuacao:
         self.max_combo = 0
     
     def desenhar(self, tela, estado):
-        if estado == "perfeito":
-            texto = self.fonte.render("Perfeito!", True, (255, 255, 255))
-        elif estado == "bom":
-            texto = self.fonte.render("Bom!", True, (255, 255, 255))
-        elif estado == "ruim":
-            texto = self.fonte.render("É...", True, (255, 255, 255))
-        elif estado == "errou":
-            texto = self.fonte.render("Errou!", True, (255, 255, 255))
-        else:
+        if estado not in self.imagens:
             return
 
-        texto_rect = texto.get_rect(center=(600, 100))
-        tela.blit(texto, texto_rect)
+        imagem = self.imagens[estado]
+        if imagem is not None:
+            tela.blit(imagem, imagem.get_rect(center=(600, 145)))

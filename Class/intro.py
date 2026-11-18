@@ -1,3 +1,4 @@
+import os
 import pygame
 
 LIMITE_NOME = 12
@@ -11,16 +12,20 @@ class Intro:
 
         self.img_l = pygame.image.load('Assets/Telas/logo.png').convert_alpha()
 
-        self.fonte = pygame.font.Font(None, 60)
+        caminho_fonte = 'Assets/Fontes/PressStart2P-Regular.ttf'
+        if not os.path.exists(caminho_fonte):
+            caminho_fonte = None
+
+        self.fonte = pygame.font.Font(caminho_fonte, 40)
 
         # ======================= NOME =======================
 
         self.etapa = "logo"
         self.nome = ""
 
-        self.fonte_titulo = pygame.font.Font(None, 80)
-        self.fonte_nome = pygame.font.Font(None, 70)
-        self.fonte_dica = pygame.font.Font(None, 32)
+        self.fonte_titulo = pygame.font.Font(caminho_fonte, 44)
+        self.fonte_nome = pygame.font.Font(caminho_fonte, 36)
+        self.fonte_dica = pygame.font.Font(caminho_fonte, 20)
 
     # =========================================================
     # EVENTOS

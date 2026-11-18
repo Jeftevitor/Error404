@@ -10,11 +10,15 @@ class Telaselecao:
         self.altura = altura
         self.fases = fases
 
-        self.fonte_titulo = pygame.font.Font(None, 65)
-        self.fonte_nome = pygame.font.Font(None, 43)
-        self.fonte_info = pygame.font.Font(None, 34)
-        self.fonte_seta = pygame.font.Font(None, 100)
-        self.fonte_voltar = pygame.font.Font(None, 28)
+        caminho_fonte = 'Assets/Fontes/PressStart2P-Regular.ttf'
+        if not os.path.exists(caminho_fonte):
+            caminho_fonte = None
+
+        self.fonte_titulo = pygame.font.Font(caminho_fonte, 40)
+        self.fonte_nome = pygame.font.Font(caminho_fonte, 24)
+        self.fonte_info = pygame.font.Font(caminho_fonte, 20)
+        self.fonte_seta = pygame.font.Font(caminho_fonte, 72)
+        self.fonte_voltar = pygame.font.Font(caminho_fonte, 18)
 
         self.amarelo = (255, 180, 40)
         self.branco = (255, 255, 255)

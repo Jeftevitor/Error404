@@ -211,8 +211,8 @@ class Jogo:
         self.fase_pendente = None
 
         self.fonte_contagem = pygame.font.Font(
-            None,
-            150
+            'Assets/Fontes/PressStart2P-Regular.ttf',
+            96
         )
 
         self.contagem_audio = pygame.mixer.Sound(

@@ -47,15 +47,38 @@ class TelaFim:
             ("vitoria", "parado"), TAM_VITORIA
         )
 
-        self.fonte_derrota = pygame.font.Font(None, 170)
-        self.fonte_titulo = pygame.font.Font(None, 80)
-        self.fonte_fase = pygame.font.Font(None, 48)
-        self.fonte_rotulo = pygame.font.Font(None, 38)
-        self.fonte_pontos = pygame.font.Font(None, 130)
-        self.fonte_classificacao = pygame.font.Font(None, 100)
-        self.fonte_dica = pygame.font.Font(None, 32)
-        self.fonte_confirmacao = pygame.font.Font(None, 54)
-        self.fonte_opcao = pygame.font.Font(None, 60)
+        imagem_confirmacao = pygame.image.load(
+            "Class/sair_jogo.png"
+        ).convert_alpha()
+        limites_imagem = imagem_confirmacao.get_bounding_rect()
+        imagem_confirmacao = imagem_confirmacao.subsurface(
+            limites_imagem
+        ).copy()
+        altura_imagem = 500
+        largura_imagem = int(
+            imagem_confirmacao.get_width()
+            * altura_imagem
+            / imagem_confirmacao.get_height()
+        )
+        self.sprite_confirmacao = pygame.transform.smoothscale(
+            imagem_confirmacao,
+            (largura_imagem, altura_imagem)
+        )
+
+        caminho_fonte = 'Assets/Fontes/PressStart2P-Regular.ttf'
+        if not os.path.exists(caminho_fonte):
+            caminho_fonte = None
+
+        self.fonte_derrota = pygame.font.Font(caminho_fonte, 72)
+        self.fonte_titulo = pygame.font.Font(caminho_fonte, 44)
+        self.fonte_fase = pygame.font.Font(caminho_fonte, 24)
+        self.fonte_rotulo = pygame.font.Font(caminho_fonte, 22)
+        self.fonte_pontos = pygame.font.Font(caminho_fonte, 58)
+        self.fonte_classificacao = pygame.font.Font(caminho_fonte, 44)
+        self.fonte_dica = pygame.font.Font(caminho_fonte, 20)
+        self.fonte_confirmacao = pygame.font.Font(caminho_fonte, 28)
+        self.fonte_opcao = pygame.font.Font(caminho_fonte, 28)
+        self.fonte_dica_confirmacao = pygame.font.Font(caminho_fonte, 18)
 
         self.tipo = None
         self.inicio = 0
@@ -298,55 +321,50 @@ class TelaFim:
 
         tela.blit(escurecer, (0, 0))
 
-        caixa = pygame.Rect(0, 0, 760, 280)
+        caixa = self.sprite_confirmacao.get_rect()
         caixa.center = (self.largura // 2, self.altura // 2)
 
-        pygame.draw.rect(
-            tela, (35, 35, 35), caixa, border_radius=18
-        )
+        tela.blit(self.sprite_confirmacao, caixa)
 
-        pygame.draw.rect(
-            tela, (255, 255, 255), caixa, width=3, border_radius=18
-        )
-
-        pergunta = self.fonte_confirmacao.render(
-            "Deseja mesmo sair desta fase?", True, (255, 255, 255)
-        )
-
-        tela.blit(
-            pergunta,
-            pergunta.get_rect(
-                center=(caixa.centerx, caixa.top + 80)
+        for linha, texto in enumerate(("Deseja mesmo sair", "desta fase?")):
+            pergunta = self.fonte_confirmacao.render(
+                texto, True, (0, 0, 0)
             )
-        )
+            tela.blit(
+                pergunta,
+                pergunta.get_rect(
+                    center=(caixa.centerx, caixa.top + 145 + linha * 45)
+                )
+            )
 
         for i, texto in enumerate(("Sim", "Não")):
 
             selecionada = (i == opcao)
 
-            cor = (0, 255, 0) if selecionada else (255, 255, 255)
-
             if selecionada:
                 texto = "> " + texto
 
-            render = self.fonte_opcao.render(texto, True, cor)
-
-            x = caixa.centerx + (-130 if i == 0 else 130)
+            render = self.fonte_opcao.render(texto, True, (0, 0, 0))
 
             tela.blit(
                 render,
-                render.get_rect(center=(x, caixa.top + 165))
+                render.get_rect(
+                    center=(
+                        caixa.centerx + (-190 if i == 0 else 190),
+                        caixa.top + 330
+                    )
+                )
             )
 
-        dica = self.fonte_dica.render(
-            "< >  escolher     ENTER  confirmar     ESC  voltar",
-            True,
-            (140, 140, 140)
-        )
-
-        tela.blit(
-            dica,
-            dica.get_rect(
-                center=(caixa.centerx, caixa.bottom - 35)
+        for linha, texto in enumerate(
+            ("< > escolher", "ENTER confirmar   ESC voltar")
+        ):
+            dica = self.fonte_dica_confirmacao.render(
+                texto, True, (0, 0, 0)
             )
-        )
+            tela.blit(
+                dica,
+                dica.get_rect(
+                    center=(caixa.centerx, caixa.bottom - 110 + linha * 38)
+                )
+            )

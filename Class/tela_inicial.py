@@ -32,8 +32,8 @@ class TelaInicial:
         self.cor_amarelo = (255, 243, 150)   # amarelo claro
         self.cor_verde = (165, 232, 178)     # verde claro
 
-        self.cor_texto = (196, 164, 132)           # marrom claro (não selecionado)
-        self.cor_texto_sel = (139, 94, 60)         # marrom claro mais forte (selecionado)
+        self.cor_texto = (196, 164, 132)
+        self.cor_texto_sel = (139, 94, 60)
 
         self.mistura = 0.0
 
@@ -51,7 +51,7 @@ class TelaInicial:
         if not os.path.exists(caminho_fonte):
             caminho_fonte = None
 
-        self.fonte_menu = pygame.font.Font(caminho_fonte, 44)
+        self.fonte_menu = pygame.font.Font(caminho_fonte, 52)
         self.fonte = pygame.font.Font(caminho_fonte, 16)
         self.fonte_titulo = pygame.font.Font(caminho_fonte, 24)
 
