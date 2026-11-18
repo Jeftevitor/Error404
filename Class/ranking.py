@@ -4,12 +4,13 @@ import pygame
 ARQUIVO_RANKING = "Assets/Arquivos_txt/ranking.txt"
 LINHAS_POR_FASE = 10
 
-OURO = (0, 0, 0)
-PRATA = (205, 205, 215)
+OURO = (212, 175, 55)
+PRATA = (192, 192, 192)
 BRONZE = (205, 127, 50)
 BRANCO = (255, 255, 255)
 CINZA = (0, 0, 0)
 VERDE = (0, 190, 0)
+PRETO = (25, 25, 25)
 
 
 def formatar_pontos(pontos):
@@ -30,11 +31,19 @@ class Ranking:
         if not os.path.exists(caminho_fonte):
             caminho_fonte = None
 
-        self.fonte_titulo = pygame.font.Font(caminho_fonte, 28)
+        self.fonte_titulo = pygame.font.Font(caminho_fonte, 38)
         self.fonte_aba = pygame.font.Font(caminho_fonte, 22)
         self.fonte_cabecalho = pygame.font.Font(caminho_fonte, 18)
         self.fonte_linha = pygame.font.Font(caminho_fonte, 22)
         self.fonte_rodape = pygame.font.Font(caminho_fonte, 16)
+
+        caminho_fundo = "Assets/Telas/fundo_ranking.png"
+        if os.path.exists(caminho_fundo):
+            self.imagem_fundo = pygame.image.load(
+                caminho_fundo
+            ).convert()
+        else:
+            self.imagem_fundo = None
 
         caminho_painel = "Assets/Telas/papel_ranking.png"
         if os.path.exists(caminho_painel):
@@ -161,6 +170,13 @@ class Ranking:
 
         tela.fill((25, 25, 25))
 
+        if self.imagem_fundo is not None:
+            imagem_fundo = pygame.transform.smoothscale(
+                self.imagem_fundo,
+                (self.largura, self.altura)
+            )
+            tela.blit(imagem_fundo, (0, 0))
+
         # ======================= IMAGEM DO PAINEL =======================
 
         largura_painel = 1300
@@ -199,7 +215,7 @@ class Ranking:
 
         for i, nome in enumerate(self.nomes_fases):
 
-            cor = VERDE if i == self.aba else CINZA
+            cor = BRANCO if i == self.aba else CINZA
 
             render = self.fonte_aba.render(nome, True, cor)
 
@@ -210,31 +226,31 @@ class Ranking:
 
             rect = render.get_rect(center=(x, 125))
 
-            tela.blit(render, rect)
-
             if i == self.aba:
-                pygame.draw.line(
+                rect_fundo = rect.inflate(28, 18)
+                pygame.draw.rect(
                     tela,
                     VERDE,
-                    (rect.left, rect.bottom + 4),
-                    (rect.right, rect.bottom + 4),
-                    3
+                    rect_fundo,
+                    border_radius=12
                 )
+
+            tela.blit(render, rect)
 
         largura_texto = 900
         x_texto = (self.largura - largura_texto) // 2
 
         col_pos = x_texto + 40
-        col_nome = x_texto + 120
-        col_pontos_direita = x_texto + 600
-        col_nota = x_texto + 650
+        centro_nome = x_texto + 270
+        centro_pontos = x_texto + 555
+        centro_nota = x_texto + 760
 
         # Cabeçalho
         for texto, x, alinhamento in (
             ("#", col_pos, "left"),
-            ("NOME", col_nome, "left"),
-            ("PONTOS", col_pontos_direita, "right"),
-            ("NOTA", col_nota, "left"),
+            ("NOME", centro_nome, "center"),
+            ("PONTOS", centro_pontos, "center"),
+            ("NOTA", centro_nota, "center"),
         ):
             render = self.fonte_cabecalho.render(texto, True, CINZA)
 
@@ -242,6 +258,8 @@ class Ranking:
 
             if alinhamento == "left":
                 rect.topleft = (x, 180)
+            elif alinhamento == "center":
+                rect.midtop = (x, 180)
             else:
                 rect.topright = (x, 180)
 
@@ -273,25 +291,40 @@ class Ranking:
                 )
             )
 
-        cores_posicao = (OURO, PRATA, BRONZE)
+        fundos_posicao = (OURO, PRATA, BRONZE)
 
         y = 246
 
         for i, registro in enumerate(linhas):
 
-            cor = cores_posicao[i] if i < 3 else BRANCO
-
-            # Destaca a linha do jogador atual
-            if (
+            cor = PRETO if i < 3 else CINZA
+            jogador_atual = (
                 nome_jogador
                 and registro["nome"].lower() == nome_jogador.lower()
-            ):
+            )
+
+            rect_linha = pygame.Rect(
+                x_texto + 15,
+                y - 5,
+                largura_texto - 30,
+                38
+            )
+
+            if i < 3:
+                pygame.draw.rect(
+                    tela,
+                    fundos_posicao[i],
+                    rect_linha,
+                    border_radius=8
+                )
+            elif jogador_atual:
                 pygame.draw.rect(
                     tela,
                     VERDE,
-                    (x_texto + 15, y - 4, largura_texto - 30, 38),
+                    rect_linha,
                     border_radius=8
                 )
+                cor = BRANCO
 
             pos = self.fonte_linha.render(f"{i + 1}", True, cor)
             nome = self.fonte_linha.render(registro["nome"], True, cor)
@@ -305,15 +338,16 @@ class Ranking:
             tela.blit(pos, (col_pos, y))
             tela.blit(
                 nome,
-                nome.get_rect(
-                    center=(x_texto + 360, y + nome.get_height() // 2)
-                )
+                nome.get_rect(center=(centro_nome, y + nome.get_height() // 2))
             )
             tela.blit(
                 pontos,
-                pontos.get_rect(topright=(col_pontos_direita, y))
+                pontos.get_rect(center=(centro_pontos, y + pontos.get_height() // 2))
             )
-            tela.blit(nota, (col_nota, y))
+            tela.blit(
+                nota,
+                nota.get_rect(center=(centro_nota, y + nota.get_height() // 2))
+            )
 
             y += 42
 

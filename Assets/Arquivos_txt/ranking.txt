@@ -1,1 +1,3 @@
 ~;Joaildo;32550;Perfeito
+a;Joaildo;31550;Ótimo
+/;Joaildo;22200;Bom
