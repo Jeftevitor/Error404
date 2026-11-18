@@ -9,12 +9,11 @@ class TelaInicial:
         self.altura = altura
 
         # Seções do menu (de cima para baixo)
-        self.botoes = ['comecar', 'score', 'creditos', 'sair']
+        self.botoes = ['comecar', 'score', 'sair']
 
         self.textos = {
             'comecar': 'COMEÇAR',
             'score': 'SCORE',
-            'creditos': 'CRÉDITOS',
             'sair': 'SAIR'
         }
 
@@ -22,7 +21,6 @@ class TelaInicial:
         self.setas = {
             'comecar': (False, True),
             'score': (True, True),
-            'creditos': (True, True),
             'sair': (True, False)
         }
 
@@ -40,12 +38,6 @@ class TelaInicial:
         # ---------------- IMAGENS ----------------
         self.img_d = self.carregar_imagem('Assets/Telas/fundo_telainicial.png')
 
-        # Fundo de créditos
-        self.img_c = pygame.image.load('Assets/Telas/fundo_creditos.png').convert_alpha()
-
-        # Bloco créditos
-        self.img_p = pygame.image.load('Assets/Telas/bloco_creditos.png').convert_alpha()
-
         # ---------------- FONTES ----------------
         caminho_fonte = 'Assets/Fontes/PressStart2P-Regular.ttf'
         if not os.path.exists(caminho_fonte):
@@ -57,7 +49,7 @@ class TelaInicial:
 
         # Posição do menu (coluna da direita)
         self.menu_x = 920
-        self.menu_y_inicial = 190
+        self.menu_y_inicial = 220
         self.menu_espaco = 130
 
     # =========================================================
@@ -139,74 +131,3 @@ class TelaInicial:
                     self.desenhar_seta(tela, self.menu_x, cy - 62, 'cima', cor)
                 if tem_baixo:
                     self.desenhar_seta(tela, self.menu_x, cy + 62, 'baixo', cor)
-
-    # =========================================================
-    # CRÉDITOS
-    # =========================================================
-
-    def desenhar_creditos(self, tela):
-
-        fundo = pygame.transform.scale(self.img_c, (self.largura, self.altura))
-        tela.blit(fundo, (0, 0))
-
-        bloco = pygame.transform.scale(self.img_p, (1000, 580))
-        bloco_rect = bloco.get_rect(center=(self.largura // 2, self.altura // 2))
-        tela.blit(bloco, bloco_rect)
-
-        fonte = self.fonte
-        fonte_titulo = self.fonte_titulo
-
-        titulo = fonte_titulo.render("CRÉDITOS", True, (255, 255, 255))
-        titulo_rect = titulo.get_rect(center=(self.largura // 2, bloco_rect.top + 45))
-        tela.blit(titulo, titulo_rect)
-
-        secoes = [
-            ("DESENVOLVEDORES:", "Jefte Vitor e Isabela Nóbrega"),
-            ("DESIGN:", "Jefte Vitor e Isabela Nóbrega"),
-            ("MÚSICA:", "Jefte Vitor")
-        ]
-
-        y = bloco_rect.top + 135
-
-        for titulo_secao, nomes in secoes:
-
-            texto_titulo = fonte.render(titulo_secao, True, (0, 0, 0))
-            tela.blit(texto_titulo, texto_titulo.get_rect(center=(self.largura // 2, y)))
-            y += 22
-
-            texto_nomes = fonte.render(nomes, True, (0, 0, 0))
-            tela.blit(texto_nomes, texto_nomes.get_rect(center=(self.largura // 2, y)))
-            y += 32
-
-        descricao = (
-            "O Error404 é um jogo rítmico inspirado em Friday Night Funkin, "
-            "ambientado no IFRN Campus Caicó, especialmente nos laboratórios "
-            "de informática. A proposta é que o jogador enfrente professores "
-            "em batalhas musicais para conseguir se formar no curso."
-        )
-
-        for sublinha in self.quebrar_texto(descricao, fonte, 700):
-            texto = fonte.render(sublinha, True, (0, 0, 0))
-            tela.blit(texto, texto.get_rect(center=(self.largura // 2, y)))
-            y += 20
-
-        enter = fonte.render("Pressione ENTER para voltar ao Menu", True, (255, 255, 255))
-        tela.blit(enter, enter.get_rect(center=(self.largura // 2, self.altura - 35)))
-
-    def quebrar_texto(self, texto, fonte, largura_maxima):
-        palavras = texto.split(" ")
-        linhas = []
-        linha_atual = ""
-
-        for palavra in palavras:
-            teste = (linha_atual + " " + palavra).strip()
-
-            if fonte.size(teste)[0] <= largura_maxima:
-                linha_atual = teste
-            else:
-                linhas.append(linha_atual)
-                linha_atual = palavra
-
-        linhas.append(linha_atual)
-
-        return linhas

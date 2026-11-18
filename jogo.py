@@ -316,9 +316,6 @@ class Jogo:
                         self.ranking.abrir()
                         self.estado = "score"
 
-                    elif botao == "creditos":
-                        self.estado = "creditos"
-
                     elif botao == "sair":
                         self.rodando = False
 
@@ -372,15 +369,6 @@ class Jogo:
                     elif evento.key == pygame.K_ESCAPE:
 
                         self.estado = "menu"
-            # ======================= CRÉDITOS =======================
-
-            elif self.estado == "creditos":
-
-                if evento.type == pygame.KEYDOWN:
-
-                    if evento.key == pygame.K_RETURN:
-                        self.estado = "menu"
-
             # ======================= CONTAGEM =======================
 
             elif self.estado == "contagem":
@@ -948,18 +936,6 @@ class Jogo:
             self.tela_selecao.desenhar(
                 self.tela,
                 self.fase_selecionada
-            )
-
-            pygame.display.update()
-
-            return
-
-        # ======================= CRÉDITOS =======================
-
-        if self.estado == "creditos":
-
-            self.tela_inicial.desenhar_creditos(
-                self.tela
             )
 
             pygame.display.update()
