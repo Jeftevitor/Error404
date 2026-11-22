@@ -16,6 +16,7 @@ class Telaselecao:
 
         self.fonte_titulo = pygame.font.Font(caminho_fonte, 40)
         self.fonte_nome = pygame.font.Font(caminho_fonte, 24)
+        self.fonte_nome_reduzida = pygame.font.Font(caminho_fonte, 18)
         self.fonte_info = pygame.font.Font(caminho_fonte, 20)
         self.fonte_seta = pygame.font.Font(caminho_fonte, 72)
         self.fonte_voltar = pygame.font.Font(caminho_fonte, 18)
@@ -28,6 +29,10 @@ class Telaselecao:
 
         self.imagens = {}
         self.imagens_cinza = {}
+        self.fundos = {}
+        self.fundos_cinza = {}
+        self.fundos_cache = {}
+        self.fundo_selecao = None
 
         # As imagens só são carregadas na primeira vez que a tela é
         # desenhada, porque convert_alpha() precisa que o pygame.display
@@ -49,7 +54,97 @@ class Telaselecao:
 
         return cinza
 
+    def _criar_fundo_cartao(self, imagem, tamanho):
+        largura, altura = tamanho
+        escala = max(
+            largura / imagem.get_width(),
+            altura / imagem.get_height()
+        )
+        tamanho_ampliado = (
+            max(largura, int(imagem.get_width() * escala)),
+            max(altura, int(imagem.get_height() * escala))
+        )
+        imagem = pygame.transform.smoothscale(
+            imagem,
+            tamanho_ampliado
+        )
+
+        recorte = imagem.subsurface(
+            (
+                (tamanho_ampliado[0] - largura) // 2,
+                (tamanho_ampliado[1] - altura) // 2,
+                largura,
+                altura
+            )
+        ).copy()
+
+        sombra = pygame.Surface(tamanho, pygame.SRCALPHA)
+        sombra.fill((0, 0, 0, 85))
+        recorte.blit(sombra, (0, 0))
+
+        return recorte
+
+    def _obter_fundo_cartao(self, fase, tamanho, desbloqueada):
+        nome = fase.get("nome", "").lower().replace(" ", "_")
+        imagens = (
+            self.fundos
+            if desbloqueada
+            else self.fundos_cinza
+        )
+        imagem = imagens.get(nome)
+
+        if imagem is None:
+            return None
+
+        chave = (nome, tamanho, desbloqueada)
+
+        if chave not in self.fundos_cache:
+            self.fundos_cache[chave] = self._criar_fundo_cartao(
+                imagem,
+                tamanho
+            )
+
+        return self.fundos_cache[chave]
+
     def carregar_imagens(self):
+
+        caminho_fundo = os.path.join(
+            "Assets",
+            "Telas",
+            "fundo_selecao.png"
+        )
+
+        if os.path.isfile(caminho_fundo):
+            try:
+                self.fundo_selecao = pygame.transform.smoothscale(
+                    pygame.image.load(caminho_fundo).convert(),
+                    (self.largura, self.altura)
+                )
+            except pygame.error as erro:
+                print(f"Erro ao carregar {caminho_fundo}: {erro}")
+        else:
+            print(f"Fundo da seleção não encontrado: {caminho_fundo}")
+
+        for fase in self.fases:
+            nome = fase.get("nome", "").lower().replace(" ", "_")
+            caminho = os.path.join(
+                "Assets",
+                "Telas",
+                f"fundo_{nome}.png"
+            )
+
+            if not os.path.isfile(caminho):
+                print(f"Fundo da fase não encontrado: {caminho}")
+                continue
+
+            try:
+                imagem = pygame.image.load(caminho).convert()
+                self.fundos[nome] = imagem
+                self.fundos_cinza[nome] = self._criar_versao_cinza(
+                    imagem
+                )
+            except pygame.error as erro:
+                print(f"Erro ao carregar {caminho}: {erro}")
 
         nomes = set()
 
@@ -112,8 +207,9 @@ class Telaselecao:
             if desbloqueada
             else self.imagens_cinza
         )
+        imagens_redimensionadas = []
 
-        for i, professor in enumerate(professores):
+        for professor in professores:
 
             imagem = imagens.get(professor)
 
@@ -134,20 +230,57 @@ class Telaselecao:
                 imagem,
                 (nova_largura, nova_altura)
             )
+            imagens_redimensionadas.append(imagem)
 
-            centro_x = (
-                area.left
-                + 15
-                + largura_individual * i
-                + largura_individual / 2
+        if not imagens_redimensionadas:
+            return
+
+        posicoes_x = []
+        limites = [
+            imagem.get_bounding_rect()
+            for imagem in imagens_redimensionadas
+        ]
+
+        for i, limite in enumerate(limites):
+            if i == 0:
+                posicoes_x.append(0)
+                continue
+
+            limite_anterior = limites[i - 1]
+            sobreposicao = int(
+                min(
+                    limite_anterior.width,
+                    limite.width
+                ) * 0.2
+            )
+            posicoes_x.append(
+                posicoes_x[i - 1]
+                + limite_anterior.right
+                - limite.left
+                - sobreposicao
             )
 
-            centro_y = topo + altura_disponivel / 2
+        esquerda = min(
+            posicao + limite.left
+            for posicao, limite in zip(posicoes_x, limites)
+        )
+        direita = max(
+            posicao + limite.right
+            for posicao, limite in zip(posicoes_x, limites)
+        )
+        deslocamento_x = area.centerx - (esquerda + direita) / 2
+        centro_y = topo + altura_disponivel / 2
 
+        for imagem, posicao_x, limite in zip(
+            imagens_redimensionadas,
+            posicoes_x,
+            limites
+        ):
             tela.blit(
                 imagem,
-                imagem.get_rect(
-                    center=(int(centro_x), int(centro_y))
+                (
+                    int(deslocamento_x + posicao_x),
+                    int(centro_y - limite.centery)
                 )
             )
 
@@ -178,6 +311,16 @@ class Telaselecao:
             border_radius=18
         )
 
+        area_fundo = area.inflate(-16, -16)
+        fundo = self._obter_fundo_cartao(
+            fase,
+            area_fundo.size,
+            desbloqueada
+        )
+
+        if fundo is not None:
+            tela.blit(fundo, area_fundo)
+
         cor_borda = (
             self.amarelo
             if selecionado
@@ -198,11 +341,21 @@ class Telaselecao:
             else self.cinza
         )
 
-        nome = self.fonte_nome.render(
-            fase.get("nome", "Fase"),
+        fonte_nome = self.fonte_nome
+        nome_texto = fase.get("nome", "Fase")
+        nome = fonte_nome.render(
+            nome_texto,
             True,
             cor_nome
         )
+
+        if nome.get_width() > area.width - 24:
+            fonte_nome = self.fonte_nome_reduzida
+            nome = fonte_nome.render(
+                nome_texto,
+                True,
+                cor_nome
+            )
 
         tela.blit(
             nome,
@@ -227,7 +380,10 @@ class Telaselecao:
         if not self.imagens_carregadas:
             self.carregar_imagens()
 
-        tela.fill(self.preto)
+        if self.fundo_selecao is not None:
+            tela.blit(self.fundo_selecao, (0, 0))
+        else:
+            tela.fill(self.preto)
 
         total = len(self.fases)
 
@@ -237,7 +393,7 @@ class Telaselecao:
         indice = indice_selecionado % total
 
         centro_x = self.largura // 2
-        centro_y = 425
+        centro_y = 380
 
         # TÍTULO
 

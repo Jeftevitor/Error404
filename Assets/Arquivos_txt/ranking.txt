@@ -3,3 +3,4 @@ Jefte;Max e Hugo;41800;Perfeito
 Jefte;Romerito;81250;Perfeito
 Jefte;Romerito;75200;Ótimo
 Jefte;Joaildo;33650;Perfeito
+ç;Romerito;66050;Ótimo

@@ -35,6 +35,13 @@ RECUO_FUNDO = 45     # deslocamento lateral do personagem de trás
 RECUO_FUNDO_FASE2 = 125
 
 DURACAO_ESTADO_MS = 455
+AVIAO_TAMANHO = (155, 140)
+AVIAO_FRAME_MS = 200
+# A ida chega à retomada rápida; a volta começa em seguida.
+AVIAO_PASSAGENS_MS = (
+    (70_230, 5_000, False),
+    (75_230, 5_000, True),
+)
 
 
 teclas_setas = {
@@ -491,6 +498,84 @@ class Jogo:
             (self.largura, self.altura)
         )
 
+        self.python_monitor = None
+
+        if indice == 1:
+            imagem_python = pygame.image.load(
+                "Assets/Telas/python.png"
+            ).convert_alpha()
+            self.python_monitor = pygame.transform.smoothscale(
+                imagem_python,
+                (22, 20)
+            )
+            self.python_monitor.set_alpha(140)
+
+        self.aviao_frames = None
+        self.aviao_frames_volta = None
+
+        if indice == 2:
+            frames = [
+                pygame.transform.smoothscale(
+                    pygame.image.load(
+                        f"Assets/Telas/aviao_{numero}.png"
+                    ).convert_alpha(),
+                    AVIAO_TAMANHO
+                )
+                for numero in (1, 2, 3)
+            ]
+            self.aviao_frames = [
+                frames[frame_indice]
+                for frame_indice in (0, 1, 2, 1, 0)
+            ]
+            self.aviao_frames_volta = [
+                pygame.transform.flip(frame, True, False)
+                for frame in self.aviao_frames
+            ]
+
+    def _desenhar_python_monitor(self):
+        if (
+            self.python_monitor is not None
+            and (pygame.time.get_ticks() // 600) % 2 == 0
+        ):
+            self.tela.blit(self.python_monitor, (784, 331))
+
+    def _desenhar_aviao(self):
+        if self.aviao_frames is None:
+            return
+
+        tempo = (
+            self.tempo_pausa - self.tempo_inicio
+            if self.estado == "confirmar_saida"
+            else pygame.time.get_ticks() - self.tempo_inicio
+        )
+
+        for inicio, duracao, voltando in AVIAO_PASSAGENS_MS:
+            tempo_passagem = tempo - inicio
+
+            if 0 <= tempo_passagem < duracao:
+                indice_frame = (
+                    tempo_passagem // AVIAO_FRAME_MS
+                ) % len(self.aviao_frames)
+                progresso = tempo_passagem / duracao
+                if voltando:
+                    x = int(
+                        self.largura
+                        - (self.largura + AVIAO_TAMANHO[0]) * progresso
+                    )
+                    frames = self.aviao_frames_volta
+                else:
+                    x = int(
+                        -AVIAO_TAMANHO[0]
+                        + (self.largura + AVIAO_TAMANHO[0]) * progresso
+                    )
+                    frames = self.aviao_frames
+
+                self.tela.blit(
+                    frames[indice_frame],
+                    (x, 85)
+                )
+                return
+
     # =========================================================
     # CARREGAR SPRITES DOS PERSONAGENS
     # =========================================================
@@ -922,6 +1007,8 @@ class Jogo:
             (0, 0)
         )
 
+        self._desenhar_python_monitor()
+        self._desenhar_aviao()
         self.desenhar_personagens()
 
         self.barra_vida.desenhar(
@@ -1034,6 +1121,7 @@ class Jogo:
                 (0, 0)
             )
 
+            self._desenhar_python_monitor()
             self.desenhar_personagens()
 
             tempo_decorrido = (
