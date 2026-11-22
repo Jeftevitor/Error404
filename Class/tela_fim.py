@@ -48,7 +48,7 @@ class TelaFim:
         )
 
         imagem_confirmacao = pygame.image.load(
-            "Class/sair_jogo.png"
+            "Assets/Telas/sair_jogo.png"
         ).convert_alpha()
         limites_imagem = imagem_confirmacao.get_bounding_rect()
         imagem_confirmacao = imagem_confirmacao.subsurface(

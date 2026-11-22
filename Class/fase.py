@@ -8,7 +8,7 @@ class Fase:
                 "arquivo": "Assets/Arquivos_txt/fase1.txt",
                 "musica": "Assets/Music/JOJO(Freak-Ariana grande).ogg",
                 "professores": ["joaildo"],
-                "pausa_final_ms": 550,
+                "pausa_final_ms": 850,
                 "desbloqueada": True
             },
             {
@@ -16,7 +16,7 @@ class Fase:
                 "arquivo": "Assets/Arquivos_txt/fase2.txt",
                 "musica": "Assets/Music/MAX_HUGO(Passeios noturnos- Jão).ogg",
                 "professores": ["hugo", "max"],
-                "pausa_final_ms": 600,
+                "pausa_final_ms": 800,
                 "desbloqueada": False
             },
             {
@@ -24,7 +24,7 @@ class Fase:
                 "arquivo": "Assets/Arquivos_txt/fase3.txt",
                 "musica": "Assets/Music/ROMERITO(Nuevayol- Bad bunny).ogg",
                 "professores": ["romerito"],
-                "pausa_final_ms": 750,
+                "pausa_final_ms": 950,
                 "desbloqueada": False
             }
         ]

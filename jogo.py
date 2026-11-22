@@ -10,6 +10,7 @@ from Class.sinc import Sinc
 from Class.ranking import Ranking
 from Class.tela_fim import TelaFim
 from Class.tele_selecao import Telaselecao
+from Class.final import Final
 
 
 MUSICA_MENU = 'Assets/Music/MENU(Desmitificar- Marina sena).ogg'
@@ -105,8 +106,14 @@ class Jogo:
             PERSONAGEM_PROTAGONISTA
         )
 
+        self.final = Final(
+            self.largura,
+            self.altura
+        )
+
         self.opcao_saida = 1
         self.tempo_pausa = 0
+        self.admin_ativado = False
 
         self.carregar_fundo(0)
         self.carregar_sprites(0)
@@ -129,6 +136,11 @@ class Jogo:
             y_barra,
             largura_barra,
             altura_barra
+        )
+
+        self.barra_vida.definir_personagens(
+            PERSONAGEM_PROTAGONISTA,
+            [professor["nome"] for professor in self.professores]
         )
 
         # ======================= SETAS =======================
@@ -429,7 +441,24 @@ class Jogo:
                 if evento.type == pygame.KEYDOWN:
 
                     if evento.key == pygame.K_RETURN:
-                        self._voltar_para_selecao()
+
+                        # Venceu a última fase: diploma + créditos
+                        if (
+                            self.estado == "vitoria"
+                            and self.fase_selecionada
+                            == len(self.fases) - 1
+                        ):
+                            self.final.iniciar()
+                            self.estado = "final"
+                        else:
+                            self._voltar_para_selecao()
+
+            # ======================= FINAL (DIPLOMA / CRÉDITOS) =======================
+
+            elif self.estado == "final":
+
+                if self.final.processar_evento(evento) == "sair":
+                    self._voltar_para_menu()
 
     # =========================================================
     # CARREGAR FASE
@@ -546,6 +575,15 @@ class Jogo:
             self.professores.append(professor)
             self.personagens.append(professor)
 
+        # atualiza as cabeças da barra de vida (ela só existe após o __init__)
+        barra = getattr(self, "barra_vida", None)
+
+        if barra is not None:
+            barra.definir_personagens(
+                PERSONAGEM_PROTAGONISTA,
+                [professor["nome"] for professor in self.professores]
+            )
+
     def definir_estado(self, personagem, estado, duracao=DURACAO_ESTADO_MS):
         personagem["estado"] = estado
 
@@ -601,12 +639,28 @@ class Jogo:
         else:
             self.admin_ativado = False
 
+        if self.estado == "final":
+
+            self.final.atualizar()
+            return
+
         if self.estado == "contagem":
 
             self._atualizar_contagem()
             return
 
         if self.estado != "jogo":
+            return
+
+        # ======================= PASSE DE ADMIN (VITÓRIA) =======================
+
+        if teclas[pygame.K_a] and teclas[pygame.K_b]:
+
+            self._finalizar_fase(
+                venceu=True,
+                salvar_ranking=False
+            )
+
             return
 
         tempo = (
@@ -779,7 +833,7 @@ class Jogo:
     # FINALIZAR FASE (DERROTA / VITÓRIA)
     # =========================================================
 
-    def _finalizar_fase(self, venceu):
+    def _finalizar_fase(self, venceu, salvar_ranking=True):
 
         pygame.mixer.music.stop()
 
@@ -801,12 +855,13 @@ class Jogo:
                 self.pontuacao.pontos_perfeitos
             )
 
-            self.ranking.salvar(
-                self.nome_jogador,
-                nome_fase,
-                pontos,
-                classificacao
-            )
+            if salvar_ranking:
+                self.ranking.salvar(
+                    self.nome_jogador,
+                    nome_fase,
+                    pontos,
+                    classificacao
+                )
 
             self.tela_fim.mostrar_vitoria(
                 nome_fase,
@@ -831,6 +886,22 @@ class Jogo:
     def _voltar_para_selecao(self):
 
         self.estado = "selecao"
+
+        pygame.mixer.music.stop()
+
+        pygame.mixer.music.load(
+            MUSICA_MENU
+        )
+
+        pygame.mixer.music.play(-1)
+
+    # =========================================================
+    # VOLTAR PARA O MENU (DEPOIS DOS CRÉDITOS)
+    # =========================================================
+
+    def _voltar_para_menu(self):
+
+        self.estado = "menu"
 
         pygame.mixer.music.stop()
 
@@ -936,6 +1007,18 @@ class Jogo:
             self.tela_selecao.desenhar(
                 self.tela,
                 self.fase_selecionada
+            )
+
+            pygame.display.update()
+
+            return
+
+        # ======================= FINAL =======================
+
+        if self.estado == "final":
+
+            self.final.desenhar(
+                self.tela
             )
 
             pygame.display.update()

@@ -1,3 +1,5 @@
-~;Joaildo;32550;Perfeito
-a;Joaildo;31550;Ótimo
-/;Joaildo;22200;Bom
+Jefte;Joaildo;35900;Perfeito
+Jefte;Max e Hugo;41800;Perfeito
+Jefte;Romerito;81250;Perfeito
+Jefte;Romerito;75200;Ótimo
+Jefte;Joaildo;33650;Perfeito
