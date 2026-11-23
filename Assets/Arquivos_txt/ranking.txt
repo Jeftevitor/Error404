@@ -1,3 +1,7 @@
 Jefte;Joaildo;35750;Perfeito
 Jefte;Max e Hugo;41550;Perfeito
 Jefte;Romerito;84500;Perfeito
+Isabela;Joaildo;29350;Ótimo
+Isabela;Max e Hugo;32750;Ótimo
+Isabela;Romerito;64750;Ótimo
+a;Joaildo;26150;Bom

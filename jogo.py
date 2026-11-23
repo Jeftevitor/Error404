@@ -132,7 +132,6 @@ class Jogo:
 
         self.opcao_saida = 1
         self.tempo_pausa = 0
-        self.admin_ativado = False
 
         self.carregar_fundo(0)
         self.carregar_sprites(0)
@@ -746,23 +745,7 @@ class Jogo:
     def atualizar(self):
         self.atualizar_personagens()
 
-        # ======================= PASSE DE ADMIN =======================
-
         teclas = pygame.key.get_pressed()
-
-        if (
-            self.estado == "selecao"
-            and teclas[pygame.K_a]
-            and teclas[pygame.K_b]
-        ):
-            if not self.admin_ativado:
-                for fase in self.fases:
-                    fase["desbloqueada"] = True
-
-                self.admin_ativado = True
-
-        else:
-            self.admin_ativado = False
 
         if self.estado == "final":
 
