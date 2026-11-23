@@ -12,9 +12,15 @@ from Class.ranking import Ranking
 from Class.tela_fim import TelaFim
 from Class.tele_selecao import Telaselecao
 from Class.final import Final
+from Class.tutorial import TutorialControles
 
 
 MUSICA_MENU = 'Assets/Music/MENU(Desmitificar- Marina sena).ogg'
+
+# Painel do tutorial: use a MESMA imagem e o MESMO tamanho da confirmação
+# de sair da fase (veja em Class/tela_fim.py, desenhar_confirmacao).
+PAINEL_TUTORIAL = None
+TAMANHO_PAINEL_TUTORIAL = (880, 605)
 
 # ======================= SPRITES DOS PERSONAGENS =======================
 
@@ -36,19 +42,14 @@ RECUO_FUNDO = 45     # deslocamento lateral do personagem de trás
 RECUO_FUNDO_FASE2 = 125
 
 DURACAO_ESTADO_MS = 455
-AVIAO_TAMANHO = (155, 140)
-AVIAO_FRAME_MS = 200
-AVIAO_Y_INICIO = 170
-AVIAO_Y_FIM = -170
-AVIAO_ARCO = 8
-AVIAO_INCLINACAO_MAXIMA = 8
-AVIAO_X_INICIO = -100
-AVIAO_X_FIM = 420
-# A ida chega à retomada rápida; a volta começa em seguida.
-AVIAO_PASSAGENS_MS = (
-    (70_230, 5_000, False),
-    (75_230, 5_000, True),
-)
+AVIAO_TAMANHO = (155, 140)       # tamanho no começo da passagem
+AVIAO_ESCALA_FIM = 1.95          
+AVIAO_FRAME_MS = 260             # troca de sprite um pouco mais lenta
+AVIAO_Y_ESQUERDA_PCT = 0.183     # altura da reta na borda esquerda
+AVIAO_X_TOPO_PCT = 0.903         # x (em % da largura) em que a reta toca o topo
+AVIAO_INCLINACAO = 7             # graus (nariz apontando para cima)
+AVIAO_INICIO_MS = 70_230
+AVIAO_DURACAO_MS = 9_000         # antes eram 5 s por passagem
 
 
 teclas_setas = {
@@ -83,6 +84,10 @@ class Jogo:
         self.altura,
         self.fases
     )
+
+        pygame.display.set_icon(
+            pygame.image.load("Assets/Telas/logo.png")
+        )
 
         self.tela = pygame.display.set_mode(
             (self.largura, self.altura)
@@ -245,6 +250,15 @@ class Jogo:
             'Assets/Music/321Go.ogg'
         )
 
+        # ======================= TUTORIAL =======================
+
+        self.tutorial = TutorialControles(
+            self.largura,
+            self.altura,
+            PAINEL_TUTORIAL,
+            TAMANHO_PAINEL_TUTORIAL
+        )
+
     # =========================================================
     # PROCESSAR TOQUE
     # =========================================================
@@ -384,29 +398,42 @@ class Jogo:
                             self.carregar_fundo(self.fase_selecionada)
                             self.carregar_sprites(self.fase_selecionada)
 
-                            pygame.mixer.music.stop()
-                            self.contagem_audio.play()
-
                             self.fase_pendente = fase
-                            self.tempo_contagem_inicio = pygame.time.get_ticks()
 
-                            self.estado = "contagem"
+                            # Só a primeira fase mostra o tutorial
+                            if self.fase_selecionada == 0:
+                                self.tutorial.iniciar()
+                                self.estado = "tutorial"
+                            else:
+                                self._iniciar_contagem()
 
                     elif evento.key == pygame.K_ESCAPE:
 
                         self.estado = "menu"
+            # ======================= TUTORIAL =======================
+
+            elif self.estado == "tutorial":
+
+                if evento.type == pygame.KEYDOWN:
+
+                    if evento.key == pygame.K_RETURN:
+
+                        # espera 1,5 s para o jogador ler o tutorial
+                        if self.tutorial.pronto():
+                            self._iniciar_contagem()
+
+                    elif evento.key == pygame.K_ESCAPE:
+
+                        self.fase_pendente = None
+                        self.estado = "selecao"
+
             # ======================= CONTAGEM =======================
 
             elif self.estado == "contagem":
 
-                if evento.type == pygame.KEYDOWN:
-
-                    if evento.key == pygame.K_ESCAPE:
-
-                        self.contagem_audio.stop()
-
-                        self.fase_pendente = None
-                        self.estado = "selecao"
+                # Sem saída durante o 3-2-1-VAI!: sair aqui deixava
+                # a música da fase/menu parada. Os eventos são ignorados.
+                pass
 
             # ======================= JOGO =======================
 
@@ -518,25 +545,25 @@ class Jogo:
             self.python_monitor.set_alpha(140)
 
         self.aviao_frames = None
-        self.aviao_frames_volta = None
 
         if indice == 2:
+            tamanho_max = (
+                int(AVIAO_TAMANHO[0] * AVIAO_ESCALA_FIM),
+                int(AVIAO_TAMANHO[1] * AVIAO_ESCALA_FIM)
+            )
             frames = [
                 pygame.transform.smoothscale(
                     pygame.image.load(
                         f"Assets/Telas/aviao_{numero}.png"
                     ).convert_alpha(),
-                    AVIAO_TAMANHO
+                    tamanho_max
                 )
                 for numero in (1, 2, 3)
             ]
+            # Ele voa da esquerda para a direita (sentido original do sprite)
             self.aviao_frames = [
                 frames[frame_indice]
                 for frame_indice in (0, 1, 2, 1, 0)
-            ]
-            self.aviao_frames_volta = [
-                pygame.transform.flip(frame, True, False)
-                for frame in self.aviao_frames
             ]
 
     def _desenhar_python_monitor(self):
@@ -556,80 +583,38 @@ class Jogo:
             else pygame.time.get_ticks() - self.tempo_inicio
         )
 
-        for inicio, duracao, voltando in AVIAO_PASSAGENS_MS:
-            tempo_passagem = tempo - inicio
+        tempo_passagem = tempo - AVIAO_INICIO_MS
 
-            if 0 <= tempo_passagem < duracao:
-                indice_frame = (
-                    tempo_passagem // AVIAO_FRAME_MS
-                ) % len(self.aviao_frames)
-                progresso = tempo_passagem / duracao
+        if not 0 <= tempo_passagem < AVIAO_DURACAO_MS:
+            return
 
-                # Trilha suave: o avião sobe da esquerda para a direita,
-                # acompanhando a direção inclinada mostrada no fundo.
-                progresso_suave = (
-                    progresso * progresso
-                    * (3 - 2 * progresso)
-                )
-                if voltando:
-                    x = int(
-                        AVIAO_X_FIM
-                        - (
-                            AVIAO_X_FIM
-                            - AVIAO_X_INICIO
-                        ) * progresso_suave
-                    )
-                    y = int(
-                        AVIAO_Y_FIM
-                        + (
-                            AVIAO_Y_INICIO
-                            - AVIAO_Y_FIM
-                        ) * progresso_suave
-                        - math.sin(progresso * math.pi)
-                        * AVIAO_ARCO
-                    )
-                    frames = self.aviao_frames_volta
-                    inclinacao = -(
-                        AVIAO_INCLINACAO_MAXIMA
-                        + math.sin(progresso * math.pi)
-                        * 2
-                    )
-                else:
-                    x = int(
-                        AVIAO_X_INICIO
-                        + (
-                            AVIAO_X_FIM
-                            - AVIAO_X_INICIO
-                        ) * progresso_suave
-                    )
-                    y = int(
-                        AVIAO_Y_INICIO
-                        + (
-                            AVIAO_Y_FIM
-                            - AVIAO_Y_INICIO
-                        ) * progresso_suave
-                        - math.sin(progresso * math.pi)
-                        * AVIAO_ARCO
-                    )
-                    frames = self.aviao_frames
-                    inclinacao = (
-                        AVIAO_INCLINACAO_MAXIMA
-                        + math.sin(progresso * math.pi)
-                        * 2
-                    )
+        progresso = tempo_passagem / AVIAO_DURACAO_MS
+        indice_frame = (
+            tempo_passagem // AVIAO_FRAME_MS
+        ) % len(self.aviao_frames)
 
-                frame = pygame.transform.rotate(
-                    frames[indice_frame],
-                    inclinacao
-                )
-                self.tela.blit(
-                    frame,
-                    (
-                        x - (frame.get_width() - AVIAO_TAMANHO[0]) // 2,
-                        y - (frame.get_height() - AVIAO_TAMANHO[1]) // 2
-                    )
-                )
-                return
+        escala = 1 + (AVIAO_ESCALA_FIM - 1) * progresso
+        largura = int(AVIAO_TAMANHO[0] * escala)
+        altura = int(AVIAO_TAMANHO[1] * escala)
+
+        x_inicio = -largura // 2
+        x_fim = self.largura + largura // 2
+        centro_x = x_inicio + (x_fim - x_inicio) * progresso
+
+        y_esquerda = self.altura * AVIAO_Y_ESQUERDA_PCT
+        x_topo = self.largura * AVIAO_X_TOPO_PCT
+        centro_y = y_esquerda * (1 - centro_x / x_topo)
+
+        frame = pygame.transform.smoothscale(
+            self.aviao_frames[indice_frame],
+            (largura, altura)
+        )
+        frame = pygame.transform.rotate(frame, AVIAO_INCLINACAO)
+
+        self.tela.blit(
+            frame,
+            frame.get_rect(center=(int(centro_x), int(centro_y)))
+        )
 
     # =========================================================
     # CARREGAR SPRITES DOS PERSONAGENS
@@ -909,6 +894,15 @@ class Jogo:
     # ATUALIZAR CONTAGEM
     # =========================================================
 
+    def _iniciar_contagem(self):
+
+        pygame.mixer.music.stop()
+        self.contagem_audio.play()
+
+        self.tempo_contagem_inicio = pygame.time.get_ticks()
+
+        self.estado = "contagem"
+
     def _atualizar_contagem(self):
 
         tempo_decorrido = (
@@ -1160,6 +1154,26 @@ class Jogo:
         if self.estado == "final":
 
             self.final.desenhar(
+                self.tela
+            )
+
+            pygame.display.update()
+
+            return
+
+        # ======================= TUTORIAL =======================
+
+        if self.estado == "tutorial":
+
+            self.tela.blit(
+                self.fundo_jogo,
+                (0, 0)
+            )
+
+            self._desenhar_python_monitor()
+            self.desenhar_personagens()
+
+            self.tutorial.desenhar(
                 self.tela
             )
 

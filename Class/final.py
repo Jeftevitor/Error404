@@ -67,9 +67,10 @@ FADE_MS = 800
 
 SPRITE_BOBINHA = 'Assets/Barra/cabeça_joaildo_s.png'   # tenta também com .png
 TEXTO_BOBINHA = '"Bobinha!"'
-ATRASO_BOBINHA_MS = 23000      # tempo parado na tela até começar a aparecer
+ATRASO_BOBINHA_MS = 15000      # tempo parado na tela até começar a aparecer
 FADE_BOBINHA_MS = 3000         # tempo que leva para aparecer por completo
 ALTURA_BOBINHA = 90            # altura do sprite (px)
+AUDIO_BOBINHA = 'Assets/Music/joaildo.ogg'   # toca uma vez quando a bobinha aparece
 
 ESCALA_DIPLOMA = 0.95         # % da janela ocupado pelo diploma (largura e altura)
 
@@ -127,6 +128,7 @@ class Final:
         self.sprites_base = None
         self.sprite_bobinha = None
         self._bobinha_carregado = False
+        self._audio_bobinha_tocado = False
         self.cache_sprites = {}
 
     def _fonte(self, tamanho):
@@ -366,6 +368,7 @@ class Final:
         self.pos_y = float(self.altura)
 
     def _iniciar_obrigado(self):
+        self._audio_bobinha_tocado = False
         self.etapa = "obrigado"
         self.tempo_etapa = pygame.time.get_ticks()
 
@@ -491,6 +494,12 @@ class Final:
 
         if not self._bobinha_carregado:
             self._carregar_sprite_bobinha()
+
+        if not self._audio_bobinha_tocado:
+            self._audio_bobinha_tocado = True
+
+            if os.path.isfile(AUDIO_BOBINHA):
+                pygame.mixer.Sound(AUDIO_BOBINHA).play()
 
         texto = self._fonte(24).render(TEXTO_BOBINHA, True, COR_TEXTO)
         texto.set_alpha(alpha)
