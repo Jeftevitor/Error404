@@ -1,4 +1,5 @@
 import os
+import math
 import pygame
 from Class.seta import Seta
 from Class.pontuacao import Pontuacao
@@ -37,6 +38,12 @@ RECUO_FUNDO_FASE2 = 125
 DURACAO_ESTADO_MS = 455
 AVIAO_TAMANHO = (155, 140)
 AVIAO_FRAME_MS = 200
+AVIAO_Y_INICIO = 170
+AVIAO_Y_FIM = -170
+AVIAO_ARCO = 8
+AVIAO_INCLINACAO_MAXIMA = 8
+AVIAO_X_INICIO = -100
+AVIAO_X_FIM = 420
 # A ida chega à retomada rápida; a volta começa em seguida.
 AVIAO_PASSAGENS_MS = (
     (70_230, 5_000, False),
@@ -557,22 +564,70 @@ class Jogo:
                     tempo_passagem // AVIAO_FRAME_MS
                 ) % len(self.aviao_frames)
                 progresso = tempo_passagem / duracao
+
+                # Trilha suave: o avião sobe da esquerda para a direita,
+                # acompanhando a direção inclinada mostrada no fundo.
+                progresso_suave = (
+                    progresso * progresso
+                    * (3 - 2 * progresso)
+                )
                 if voltando:
                     x = int(
-                        self.largura
-                        - (self.largura + AVIAO_TAMANHO[0]) * progresso
+                        AVIAO_X_FIM
+                        - (
+                            AVIAO_X_FIM
+                            - AVIAO_X_INICIO
+                        ) * progresso_suave
+                    )
+                    y = int(
+                        AVIAO_Y_FIM
+                        + (
+                            AVIAO_Y_INICIO
+                            - AVIAO_Y_FIM
+                        ) * progresso_suave
+                        - math.sin(progresso * math.pi)
+                        * AVIAO_ARCO
                     )
                     frames = self.aviao_frames_volta
+                    inclinacao = -(
+                        AVIAO_INCLINACAO_MAXIMA
+                        + math.sin(progresso * math.pi)
+                        * 2
+                    )
                 else:
                     x = int(
-                        -AVIAO_TAMANHO[0]
-                        + (self.largura + AVIAO_TAMANHO[0]) * progresso
+                        AVIAO_X_INICIO
+                        + (
+                            AVIAO_X_FIM
+                            - AVIAO_X_INICIO
+                        ) * progresso_suave
+                    )
+                    y = int(
+                        AVIAO_Y_INICIO
+                        + (
+                            AVIAO_Y_FIM
+                            - AVIAO_Y_INICIO
+                        ) * progresso_suave
+                        - math.sin(progresso * math.pi)
+                        * AVIAO_ARCO
                     )
                     frames = self.aviao_frames
+                    inclinacao = (
+                        AVIAO_INCLINACAO_MAXIMA
+                        + math.sin(progresso * math.pi)
+                        * 2
+                    )
 
-                self.tela.blit(
+                frame = pygame.transform.rotate(
                     frames[indice_frame],
-                    (x, 85)
+                    inclinacao
+                )
+                self.tela.blit(
+                    frame,
+                    (
+                        x - (frame.get_width() - AVIAO_TAMANHO[0]) // 2,
+                        y - (frame.get_height() - AVIAO_TAMANHO[1]) // 2
+                    )
                 )
                 return
 
